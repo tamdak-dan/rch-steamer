@@ -1,0 +1,56 @@
+/* ---------- MAIN WINDOW STYLES ----------  */
+QMainWindow {
+    font-family: __proj_font__;
+    font-size: __B1-font-size__;
+    color: __proj_font_color__;
+    background-color: __main_bg_color__;
+}
+
+/* ---------- GLOBAL STYLES FOR ALL WIDGETS ----------  */
+QLabel{
+    font-family: __proj_font__;
+    font-size: __B1-font-size__;
+    color: __proj_font_color__;
+}
+
+QPushButton {
+    color: __button_font_color__;
+    background-color: __button_bg_color__;
+    border: __button_border__;
+    border-radius: __button_border_radius__;
+} 
+
+
+/* ---------- NAVIGATION BAR STYLES ----------  */
+QWidget#NavigationWidget {
+    font-family: __proj_font__;
+    font-size: __H1-font-size__;
+    background-color: __widget_bg_color__;
+    border: __widget_border__;
+    border-radius: 0px;
+}
+
+QLabel#ProjectTitle {
+    font-size: __H1-font-size__;
+    color: #ffffff;
+}
+
+QLabel#Alarm_LED {
+    border: 1px solid #ffffff;
+    border-radius: 10px;
+    background-color: #ff0000;
+}
+
+/* ---------- RUN SCREEN STYLES ----------  */
+QWidget#RunPage {
+    font-family: __proj_font__;
+    font-size: __H1-font-size__;
+    background-color: __widget_bg_color__;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+}
+
+/* ---------- ALARM SCREEN STYLES ----------  */
+
+
+/* ---------- MAINTENANCE SCREEN STYLES ----------  */
