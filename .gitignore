@@ -1,0 +1,17 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environments and secrets
+.env
+.env.local
+
+# Dependencies (uncomment the one your project uses)
+# node_modules/
+# venv/
+# .venv/
+
+# Build outputs
+dist/
+build/
+*.log
