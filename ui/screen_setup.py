@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
 
         # Instantiate and register screens
         self.run_screen = RunScreen()
+        self.run_screen1 = RunScreen() # --- IGNORE ---
         self.alarm_screen = AlarmScreen()
         self.maint_screen = MaintScreen()
 
