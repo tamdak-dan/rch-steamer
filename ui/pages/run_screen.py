@@ -10,6 +10,7 @@ class RunScreen(QWidget):
 
     def _setup_ui(self):
         # 1. Open the .ui file safely
+        #ui_file_path = "ui/resources/RunPage_widget.ui"                ui_file_path = "ui/resources/RunPage_widget.ui"
         ui_file_path = "ui/resources/RunPage_test.ui"
         ui_file = QFile(ui_file_path)
 

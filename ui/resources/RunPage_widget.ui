@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,182 +19,175 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,4">
    <item>
-    <layout class="QVBoxLayout" name="pressure_vbox" stretch="0,0">
+    <widget class="QLabel" name="pressure_label">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Pressure</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,1,1">
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <property name="sizeConstraint">
-      <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+      <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QLabel" name="pressure_label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Pressure</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,1,1">
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1,1">
        <property name="spacing">
         <number>0</number>
        </property>
        <property name="sizeConstraint">
-        <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1,1">
-         <property name="spacing">
-          <number>0</number>
+        <widget class="QLabel" name="downstream_label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+         <property name="text">
+          <string>Downstream [P1]</string>
          </property>
-         <item>
-          <widget class="QLabel" name="downstream_label">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Downstream [P1]</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="upstream_label">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Upstream [P2]</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="atmref_label">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Atm Ref [P3]</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+        <widget class="QLabel" name="upstream_label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <item>
-          <widget class="QLabel" name="PLC_downstream_pressure">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>PLC_P1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="PLC_upstream_pressure">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>PLC_P2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="PLC_atm_pressure">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>PLC_P3</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
+         <property name="text">
+          <string>Upstream [P2]</string>
+         </property>
+        </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <property name="sizeConstraint">
-          <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+        <widget class="QLabel" name="atmref_label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <item>
-          <widget class="QLabel" name="torr_unit1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Torr</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="torr_unit2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Torr</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="torr_unit3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Torr</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+         <property name="text">
+          <string>Atm Ref [P3]</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+       </property>
+       <item>
+        <widget class="QLabel" name="PLC_downstream_pressure">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>PLC_P1</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="PLC_upstream_pressure">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>PLC_P2</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="PLC_atm_pressure">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>PLC_P3</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="sizeConstraint">
+        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+       </property>
+       <item>
+        <widget class="QLabel" name="torr_unit1">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Torr</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="torr_unit2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Torr</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="torr_unit3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Torr</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
