@@ -13,7 +13,7 @@
   <property name="sizePolicy">
    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
     <horstretch>0</horstretch>
-    <verstretch>1</verstretch>
+    <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="windowTitle">

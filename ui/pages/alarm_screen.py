@@ -3,7 +3,6 @@ from PySide6.QtCore import Signal, QFile
 from PySide6.QtUiTools import QUiLoader
 
 class AlarmScreen(QWidget):
-    navigate_to = Signal(int)
 
     def __init__(self):
         super().__init__()
