@@ -3,6 +3,7 @@ from PySide6.QtCore import Signal, QFile
 from PySide6.QtUiTools import QUiLoader
 
 class RunScreen(QWidget):
+    HMI_bRun = Signal(bool)          # carries the checked state
 
     def __init__(self):
         super().__init__()
@@ -23,3 +24,5 @@ class RunScreen(QWidget):
         container_layout = QVBoxLayout(self)
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(ui_widget)
+
+        ui_widget.HMI_bRun.toggled.connect(self.HMI_bRun.emit)

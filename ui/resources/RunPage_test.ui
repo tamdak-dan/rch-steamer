@@ -366,6 +366,13 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_11">
      <item>
+      <widget class="QRadioButton" name="HMI_bRun">
+       <property name="text">
+        <string>RUN</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_21">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">

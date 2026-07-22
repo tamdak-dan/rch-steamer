@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QHBoxLayout, QMainWindow, QStackedWidget, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
+from comms.ads_client import AdsClient
 
 # Import the custom pages from your subfolders
 from ui.pages.run_screen import RunScreen
@@ -53,6 +54,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.stacked_widget, stretch=3)
 
         self.apply_styles()
+        self._setup_comms()
 
     def apply_styles(self):
         # 2. set up global style for the app
@@ -80,3 +82,27 @@ class MainWindow(QMainWindow):
             style = style.replace(var_name, var_value)
 
         self.setStyleSheet(style)
+
+    def _setup_comms(self):
+        self.ads = AdsClient(
+            ams_net_id="5.177.96.78.1.1",   # CX7000 AMS Net ID
+            ip_address="192.168.137.121",
+            poll_ms=250,
+        )
+
+        # setup PLC tags
+        self.run_screen.HMI_bRun.connect(lambda checked: self.ads.write("HMI_bRun", checked))
+
+        #self.ads.data_updated.connect(self.run_screen.update_values)
+        self.ads.connection_changed.connect(self._on_connection_changed)
+        self.ads.error_occurred.connect(lambda msg: print(msg))
+        self.ads.start()
+
+    def _on_connection_changed(self, connected: bool):
+        self.setWindowTitle(
+            f"RPI4 Equipment Controller — {'Connected' if connected else 'Disconnected'}"
+        )
+
+    def closeEvent(self, event):
+        self.ads.shutdown()   # stops the thread cleanly on window close
+        super().closeEvent(event)
