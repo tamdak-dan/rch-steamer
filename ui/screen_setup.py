@@ -86,14 +86,14 @@ class MainWindow(QMainWindow):
     def _setup_comms(self):
         self.ads = AdsClient(
             ams_net_id="5.177.96.78.1.1",   # CX7000 AMS Net ID
-            ip_address="192.168.137.121",
+            ip_address="192.168.137.6",      # CX7000 IP address
             poll_ms=250,
         )
 
         # setup PLC tags
         self.run_screen.HMI_bRun.connect(lambda checked: self.ads.write("HMI_bRun", checked))
 
-        #self.ads.data_updated.connect(self.run_screen.update_values)
+        self.ads.data_updated.connect(self.run_screen.update_values)
         self.ads.connection_changed.connect(self._on_connection_changed)
         self.ads.error_occurred.connect(lambda msg: print(msg))
         self.ads.start()

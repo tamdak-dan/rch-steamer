@@ -373,6 +373,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="HMI_nPT1">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_21">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">

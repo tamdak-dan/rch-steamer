@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, QThread, Signal, Slot, QTimer
 # ---------------------------------------------------------------------------
 TAG_MAP = {
     "HMI_bRun":     ("MAIN.HMI_bRun",    pyads.PLCTYPE_BOOL),
-    #"pt1":         ("MAIN.PT1",         pyads.PLCTYPE_INT),   # upstream pressure
+    "nPT1":         ("MAIN.HMI_nPT1",        pyads.PLCTYPE_INT),   # upstream pressure
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),
     #"tc1":         ("MAIN.TC1",         pyads.PLCTYPE_INT),
@@ -133,8 +133,8 @@ class AdsWorker(QObject):
             # At 6 tags and 250ms that's 24 round-trips/sec vs 4. On a
             # CX7000 (small ARM controller, modest ADS server) that
             # difference is the gap between "fine" and "sluggish".
-            request = [(sym, typ) for sym, typ in TAG_MAP.values()]
-            raw = self._plc.read_list_by_name(request)
+            symbol_names = [sym for sym, _ in TAG_MAP.values()]
+            raw = self._plc.read_list_by_name(symbol_names)
 
             # raw comes back keyed by PLC symbol name ("MAIN.PT1"). Flip it
             # to your friendly keys ("pt1") so nothing downstream of here
