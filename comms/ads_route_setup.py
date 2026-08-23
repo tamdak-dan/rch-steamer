@@ -6,7 +6,7 @@ PI_NETID     = "192.168.1.20.1.1"    # RPi AMS Net ID = its IP + ".1.1"
 PLC_IP       = "192.168.1.10"        # the CX7000's IP
 PLC_USER     = "Administrator"       # CX7000 Windows/CE login
 PLC_PASS     = "1"                   # default CX7000 password is often "1"
-ROUTE_NAME   = "HMI"             # any label you like
+ROUTE_NAME   = "HMI"                 # any label you like
 
 pyads.open_port()
 

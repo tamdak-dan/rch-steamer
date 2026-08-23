@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         )
 
         # setup PLC tags
-        self.run_screen.HMI_bRun.connect(lambda checked: self.ads.write("HMI_bRun", checked))
+        # EXAMPLE BUTTON self.run_screen.HMI_bRun.connect(lambda checked: self.ads.write("HMI_bRun", checked))
 
         self.ads.data_updated.connect(self.run_screen.update_values)
         self.ads.connection_changed.connect(self._on_connection_changed)

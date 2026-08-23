@@ -3,7 +3,7 @@ from PySide6.QtCore import Signal, QFile, Slot
 from PySide6.QtUiTools import QUiLoader
 
 class RunScreen(QWidget):
-    HMI_bRun = Signal(bool)          # carries the checked state
+    # EXAMPLE BUTTON HMI_bRun = Signal(bool)          # carries the checked state
 
     def __init__(self):
         super().__init__()
@@ -26,9 +26,12 @@ class RunScreen(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(self.ui)
 
-        self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
+        # EXAMPLE BUTTON self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
         
 
+    #@Slot(dict)
+    #def update_values(self, values: dict):
+    #    self.ui.HMI_nPT1.setText(f"{values['nPT1'] / 10:.1f}")
     @Slot(dict)
     def update_values(self, values: dict):
-        self.ui.HMI_nPT1.setText(f"{values['nPT1'] / 10:.1f}")
+        self.ui.PLC_nUpstreamPress.setText(str(values['PLC_nUpstreamPress']))
