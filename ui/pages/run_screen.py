@@ -26,6 +26,8 @@ class RunScreen(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(self.ui)
 
+        self.ui.AlarmTable.setAlternatingRowColors(True)
+        print(self.ui.AlarmTable.alternatingRowColors())  
         # EXAMPLE BUTTON self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
         
 

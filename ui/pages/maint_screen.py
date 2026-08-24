@@ -19,6 +19,10 @@ class MaintScreen(QWidget):
         ui_widget = loader.load(ui_file, self)
         ui_file.close()
 
+        ui_widget.Maint_AlarmTable.setAlternatingRowColors(True)
+        print(ui_widget.Maint_AlarmTable.alternatingRowColors())  
+        ui_widget.Maint_AlarmTable.setRowCount(12)
+
         # Wrap ui_widget in a layout on self instead of stripping its layout
         container_layout = QVBoxLayout(self)
         container_layout.setContentsMargins(0, 0, 0, 0)

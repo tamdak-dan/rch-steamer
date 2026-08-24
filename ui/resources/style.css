@@ -50,6 +50,18 @@ QWidget#RunPage {
     border-radius: __widget_border_radius__;
 }
 
+QTableView#Maint_AlarmTable {
+    font-family: __proj_font__;
+    font-size: __H1-font-size__;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+    background-color: #b12828;           /* odd (normal) rows */
+    alternate-background-color: #b4b4b4c2; /* even rows */
+    gridline-color: #050a13;
+    selection-background-color: #185FA5;
+    selection-color: #850f0f;
+}
+
 /* ---------- ALARM SCREEN STYLES ----------  */
 
 
