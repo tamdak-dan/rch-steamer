@@ -21,7 +21,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="Maint_AlarmTable"/>
+    <widget class="QTableWidget" name="Maint_AlarmTable">
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+    </widget>
    </item>
   </layout>
  </widget>

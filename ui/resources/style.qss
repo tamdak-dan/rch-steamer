@@ -50,7 +50,21 @@ QWidget#RunPage {
     border-radius: __widget_border_radius__;
 }
 
-QTableView#Maint_AlarmTable {
+QTableView#PressureTable {
+    font-family: __proj_font__;
+    font-size: __B1-font-size__;
+    color: __proj_font_color__;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+    background-color: #2b2b2b;           /* odd (normal) rows */
+    alternate-background-color: #484848; /* even rows */
+    gridline-color: #050a13; 
+    selection-background-color: #ffffffad;
+    selection-color: #1269cc;
+}
+
+/* ---------- ALARM SCREEN STYLES ----------  */
+QTableView#AlarmTable {
     font-family: __proj_font__;
     font-size: __H1-font-size__;
     border: __widget_border__;
@@ -61,8 +75,5 @@ QTableView#Maint_AlarmTable {
     selection-background-color: #185FA5;
     selection-color: #850f0f;
 }
-
-/* ---------- ALARM SCREEN STYLES ----------  */
-
 
 /* ---------- MAINTENANCE SCREEN STYLES ----------  */

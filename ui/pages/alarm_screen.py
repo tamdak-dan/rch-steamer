@@ -18,6 +18,12 @@ class AlarmScreen(QWidget):
         ui_widget = loader.load(ui_file, self)
         ui_file.close()
 
+        tbl = ui_widget.AlarmTable
+        tbl.setColumnCount(3)
+        tbl.setHorizontalHeaderLabels(["Code", "Time", "Description"])
+        tbl.setRowCount(10)
+        tbl.setAlternatingRowColors(True)
+
         # Wrap ui_widget in a layout on self instead of stripping its layout
         container_layout = QVBoxLayout(self)
         container_layout.setContentsMargins(0, 0, 0, 0)

@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         }
 
         # open css files and replace style vars with actual values
-        with open("ui/resources/style.css", "r") as f:
+        with open("ui/resources/style.qss", "r") as f:
             style = f.read()
 
         for var_name, var_value in APPLICATION_STYLE.items():

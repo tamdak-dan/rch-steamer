@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QSizePolicy, QVBoxLayout, QWidget, QAbstractScrollArea
 from PySide6.QtCore import Signal, QFile, Slot
 from PySide6.QtUiTools import QUiLoader
+
 
 class RunScreen(QWidget):
     # EXAMPLE BUTTON HMI_bRun = Signal(bool)          # carries the checked state
@@ -12,7 +13,7 @@ class RunScreen(QWidget):
     def _setup_ui(self):
         # 1. Open the .ui file safely
         #ui_file_path = "ui/resources/RunPage_widget.ui"                ui_file_path = "ui/resources/RunPage_widget.ui"
-        ui_file_path = "ui/resources/RunPage_test.ui"
+        ui_file_path = "ui/resources/RunPage_test2.ui"
         ui_file = QFile(ui_file_path)
 
         # 2. Instantiate the loader and load the layout
@@ -26,8 +27,18 @@ class RunScreen(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(self.ui)
 
-        self.ui.AlarmTable.setAlternatingRowColors(True)
-        print(self.ui.AlarmTable.alternatingRowColors())  
+        pressure_table = self.ui.PressureTable
+        pressure_table.setHorizontalHeaderLabels(["Sensor", "Pressure (torr)"])
+        pressure_table.setAlternatingRowColors(True)
+        pressure_table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        pressure_table.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+
+        temp_table = self.ui.TempTable
+        temp_table.setHorizontalHeaderLabels(["Sensor", "Temp (deg C)"])
+        temp_table.setAlternatingRowColors(True)
+        temp_table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        temp_table.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+    
         # EXAMPLE BUTTON self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
         
 
