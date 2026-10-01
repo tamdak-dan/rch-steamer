@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
             "__button_bg_color__": "#acacac",  # Background color for buttons
             "__button_font_color__": "#000000",  # Font color for buttons
             "__button_border__": "2px solid #000000",  # Border for buttons
+            "__button_border_checked__": "2px solid #ffffff",  # Border for buttons
             "__button_border_radius__": "5px",  # Rounded corners for buttons
             "__H1-font-size__": "22px",  # Font size for H1 headers
             "__H2-font-size__": "18px",  # Font size for H2 headers

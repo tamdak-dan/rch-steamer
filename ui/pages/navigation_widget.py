@@ -27,6 +27,6 @@ class NavigationWidget(QWidget):
         # From any screen, go to run screen
         ui_widget.btn_to_RunScreen.clicked.connect(lambda: self.navigate_to.emit(0))
         # From any screen, go to alarm screen
-        ui_widget.btn_to_AlarmScreen.clicked.connect(lambda: self.navigate_to.emit(1))
+        #ui_widget.btn_to_AlarmScreen.clicked.connect(lambda: self.navigate_to.emit(1))
         # From any screen, go to maintenance screen
-        ui_widget.btn_to_MaintScreen.clicked.connect(lambda: self.navigate_to.emit(2))
+        #ui_widget.btn_to_MaintScreen.clicked.connect(lambda: self.navigate_to.emit(2))

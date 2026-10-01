@@ -13,7 +13,7 @@ class RunScreen(QWidget):
     def _setup_ui(self):
         # 1. Open the .ui file safely
         #ui_file_path = "ui/resources/RunPage_widget.ui"                ui_file_path = "ui/resources/RunPage_widget.ui"
-        ui_file_path = "ui/resources/RunPage_test2.ui"
+        ui_file_path = "ui/resources/RunPage_test3.ui"
         ui_file = QFile(ui_file_path)
 
         # 2. Instantiate the loader and load the layout
@@ -27,18 +27,14 @@ class RunScreen(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(self.ui)
 
-        pressure_table = self.ui.PressureTable
-        pressure_table.setHorizontalHeaderLabels(["Sensor", "Pressure (torr)"])
-        pressure_table.setAlternatingRowColors(True)
-        pressure_table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        pressure_table.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
 
-        temp_table = self.ui.TempTable
-        temp_table.setHorizontalHeaderLabels(["Sensor", "Temp (deg C)"])
-        temp_table.setAlternatingRowColors(True)
-        temp_table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        temp_table.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-    
+        # change text on button presses
+        self.ui.PLC_bCmdSes.toggled.connect(lambda checked: self.ui.PLC_bCmdSes.setText("System Enabled" if checked else "System Disabled"))
+        self.ui.PLC_bCmdDelivery.toggled.connect(lambda checked: self.ui.PLC_bCmdDelivery.setText("Delivery Enabled" if checked else "Delivery Disabled"))
+
+        # change value of steam setpoint based on slider
+        self.ui.horizontalSlider.valueChanged.connect(lambda value: self.ui.PLC_nSteamFlowStpt.setText(str(value/4)))
+
         # EXAMPLE BUTTON self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
         
 
@@ -47,4 +43,4 @@ class RunScreen(QWidget):
     #    self.ui.HMI_nPT1.setText(f"{values['nPT1'] / 10:.1f}")
     @Slot(dict)
     def update_values(self, values: dict):
-        self.ui.PLC_nUpstreamPress.setText(str(values['PLC_nUpstreamPress']))
+        self.ui.PLC_nSteamFlowMeasured.setText(str(values['PLC_nSteamFlowMeasured']))

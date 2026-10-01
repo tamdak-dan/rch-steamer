@@ -8,8 +8,10 @@ from PySide6.QtCore import QObject, QThread, Signal, Slot, QTimer
 #   value = (ADS symbol name, pyads type)
 # ---------------------------------------------------------------------------
 TAG_MAP = {
-    "PLC_nHeartbeat":     ("GVL_HMI.stHmiStatus.nPlcHeartbeat",             pyads.PLCTYPE_UDINT),   # heartbeat counter
-    "PLC_nUpstreamPress": ("GVL_HMI.stHmiStatus.stProcess.rPt1Upstream",    pyads.PLCTYPE_REAL),   # upstream pressure
+    "PLC_nHeartbeat": ("GVL_HMI.stHmiStatus.nPlcHeartbeat", pyads.PLCTYPE_UDINT),  # heartbeat counter
+    #"PLC_sMachineState": ("GVL_HMI.stHmiStatus.eState", pyads.PLCTYPE_STRING), # machine state
+    "PLC_nSteamFlowMeasured": ("GVL_HMI.stHmiStatus.stProcess.rFlowActual", pyads.PLCTYPE_REAL),   # calculated pressure
+    "PLC_bAnyFault": ("GVL_HMI.stHmiStatus.bAnyFault", pyads.PLCTYPE_BOOL),   # fault indicator
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),
     #"tc1":         ("MAIN.TC1",         pyads.PLCTYPE_INT),

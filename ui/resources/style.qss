@@ -14,6 +14,7 @@ QLabel{
 }
 
 QPushButton {
+    font-family: __proj_font__;
     color: __button_font_color__;
     background-color: __button_bg_color__;
     border: __button_border__;
@@ -50,17 +51,24 @@ QWidget#RunPage {
     border-radius: __widget_border_radius__;
 }
 
-QTableView#PressureTable {
-    font-family: __proj_font__;
+QPushButton#PLC_bCmdDelivery {
     font-size: __B1-font-size__;
-    color: __proj_font_color__;
-    border: __widget_border__;
-    border-radius: __widget_border_radius__;
-    background-color: #2b2b2b;           /* odd (normal) rows */
-    alternate-background-color: #484848; /* even rows */
-    gridline-color: #050a13; 
-    selection-background-color: #ffffffad;
-    selection-color: #1269cc;
+    background-color: __button_bg_color__;
+    border: __button_border__;
+}
+QPushButton#PLC_bCmdDelivery:checked {
+    background-color: #00ca3d;
+    border: __button_border_checked__;
+}
+
+QPushButton#PLC_bCmdSes {
+    font-size: __B1-font-size__;
+    background-color: __button_bg_color__;
+    border: __button_border__;
+}
+QPushButton#PLC_bCmdSes:checked {
+    background-color: #00ca3d;
+    border: __button_border_checked__;
 }
 
 /* ---------- ALARM SCREEN STYLES ----------  */
