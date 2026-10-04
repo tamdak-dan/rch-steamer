@@ -107,7 +107,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="MachineState_LED">
+        <widget class="QLabel" name="PLC_sMachineState">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
            <horstretch>0</horstretch>

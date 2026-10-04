@@ -1,8 +1,10 @@
 import pyads
 
 # --- Fill these in for your network ---
-PI_IP        = "192.168.1.20"        # the RPi's IP
-PI_NETID     = "192.168.1.20.1.1"    # RPi AMS Net ID = its IP + ".1.1"
+#PI_IP        = "192.168.1.20"        # the RPi's IP
+#PI_NETID     = "192.168.1.20.1.1"    # RPi AMS Net ID = its IP + ".1.1"
+PI_IP        = "192.168.1.15"        # DESKTOP IP
+PI_NETID     = "192.168.1.15.1.1"    # DESKTOP NET ID
 PLC_IP       = "192.168.1.10"        # the CX7000's IP
 PLC_USER     = "Administrator"       # CX7000 Windows/CE login
 PLC_PASS     = "1"                   # default CX7000 password is often "1"

@@ -8,10 +8,20 @@ from PySide6.QtCore import QObject, QThread, Signal, Slot, QTimer
 #   value = (ADS symbol name, pyads type)
 # ---------------------------------------------------------------------------
 TAG_MAP = {
+    #general tags
     "PLC_nHeartbeat": ("GVL_HMI.stHmiStatus.nPlcHeartbeat", pyads.PLCTYPE_UDINT),  # heartbeat counter
-    #"PLC_sMachineState": ("GVL_HMI.stHmiStatus.eState", pyads.PLCTYPE_STRING), # machine state
-    "PLC_nSteamFlowMeasured": ("GVL_HMI.stHmiStatus.stProcess.rFlowActual", pyads.PLCTYPE_REAL),   # calculated pressure
+    "PLC_sMachineState": ("GVL_HMI.stHmiStatus.sStateName", pyads.PLCTYPE_STRING), # machine state
     "PLC_bAnyFault": ("GVL_HMI.stHmiStatus.bAnyFault", pyads.PLCTYPE_BOOL),   # fault indicator
+
+
+    #run screen
+    "PLC_nSteamFlowMeasured": ("GVL_HMI.stHmiStatus.stProcess.rFlowActual", pyads.PLCTYPE_REAL),   # calculated flow
+    "PLC_nSteamFlowStpt": ("GVL_HMI.stHmiSetpoints.stProcess.rSetFlow", pyads.PLCTYPE_REAL),   # flow setpoint
+    "PLC_bSesOn": ("GVL_HMI.stHmiCommand.bSesOn", pyads.PLCTYPE_BOOL),   # system on indicator
+    "PLC_bSesOff": ("GVL_HMI.stHmiCommand.bSesOff", pyads.PLCTYPE_BOOL),  # system off indicator
+    "PLC_bDeliveryOn": ("GVL_HMI.stHmiCommand.bSteamDeliveryOn", pyads.PLCTYPE_BOOL),  # delivery ON command indicator
+    "PLC_bDeliveryOff": ("GVL_HMI.stHmiCommand.bSteamDeliveryOff", pyads.PLCTYPE_BOOL),  # delivery OFF command indicator
+
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),
     #"tc1":         ("MAIN.TC1",         pyads.PLCTYPE_INT),
