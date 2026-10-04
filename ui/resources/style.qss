@@ -39,7 +39,13 @@ QLabel#ProjectTitle {
 QLabel#Alarm_LED {
     border: 1px solid #ffffff;
     border-radius: 10px;
-    background-color: #ff0000;
+    background-color: #7a7a7a;          /* default / no comms: grey */
+}
+QLabel#Alarm_LED[state="ok"] {
+    background-color: #00c040;          /* green */
+}
+QLabel#Alarm_LED[state="alarm"] {
+    background-color: #ff0000;          /* red */
 }
 
 /* ---------- RUN SCREEN STYLES ----------  */

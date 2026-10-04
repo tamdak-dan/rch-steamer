@@ -106,7 +106,7 @@
          </property>
         </widget>
        </item>
-       <item>
+       <item alignment="Qt::AlignmentFlag::AlignLeft">
         <widget class="QLabel" name="PLC_sMachineState">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -116,6 +116,9 @@
          </property>
          <property name="text">
           <string>Not Initialized</string>
+         </property>
+         <property name="indent">
+          <number>5</number>
          </property>
         </widget>
        </item>
@@ -157,6 +160,9 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+         <property name="indent">
+          <number>5</number>
          </property>
         </widget>
        </item>

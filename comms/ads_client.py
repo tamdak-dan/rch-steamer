@@ -11,16 +11,18 @@ TAG_MAP = {
     #general tags
     "PLC_nHeartbeat": ("GVL_HMI.stHmiStatus.nPlcHeartbeat", pyads.PLCTYPE_UDINT),  # heartbeat counter
     "PLC_sMachineState": ("GVL_HMI.stHmiStatus.sStateName", pyads.PLCTYPE_STRING), # machine state
-    "PLC_bAnyFault": ("GVL_HMI.stHmiStatus.bAnyFault", pyads.PLCTYPE_BOOL),   # fault indicator
-
+    "PLC_bAnyFault": ("GVL_HMI.stHmiStatus.stFaults.bAnyFault", pyads.PLCTYPE_BOOL),   # fault indicator
 
     #run screen
     "PLC_nSteamFlowMeasured": ("GVL_HMI.stHmiStatus.stProcess.rFlowActual", pyads.PLCTYPE_REAL),   # calculated flow
-    "PLC_nSteamFlowStpt": ("GVL_HMI.stHmiSetpoints.stProcess.rSetFlow", pyads.PLCTYPE_REAL),   # flow setpoint
+    "PLC_nSteamFlowStpt": ("GVL_HMI.stHmiSetpoints.rSetFlow", pyads.PLCTYPE_REAL),   # flow setpoint
     "PLC_bSesOn": ("GVL_HMI.stHmiCommand.bSesOn", pyads.PLCTYPE_BOOL),   # system on indicator
     "PLC_bSesOff": ("GVL_HMI.stHmiCommand.bSesOff", pyads.PLCTYPE_BOOL),  # system off indicator
     "PLC_bDeliveryOn": ("GVL_HMI.stHmiCommand.bSteamDeliveryOn", pyads.PLCTYPE_BOOL),  # delivery ON command indicator
     "PLC_bDeliveryOff": ("GVL_HMI.stHmiCommand.bSteamDeliveryOff", pyads.PLCTYPE_BOOL),  # delivery OFF command indicator
+
+    #
+    
 
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),
@@ -28,6 +30,11 @@ TAG_MAP = {
     #"stage":       ("MAIN.Stage",       pyads.PLCTYPE_INT),
     #"alarm_active":("MAIN.AlarmActive", pyads.PLCTYPE_BOOL),
 }
+
+# add active alarm array to be displayed on alarm table
+for i in range(1, 6):
+    TAG_MAP[f"PLC_sFault{i}"]     = (f"GVL_HMI.stHmiStatus.aActiveFaults[1,{i}]", pyads.PLCTYPE_STRING)
+    TAG_MAP[f"PLC_sFaultTime{i}"] = (f"GVL_HMI.stHmiStatus.aActiveFaults[2,{i}]", pyads.PLCTYPE_STRING)
 
 # ===========================================================================
 # ADS WORKER  —  runs on the BACKGROUND thread
@@ -74,6 +81,7 @@ class AdsWorker(QObject):
         self._ip_address = ip_address
         self._ams_port = ams_port
         self._poll_ms = poll_ms
+        self._hb = 0        # HMI -> PLC heartbeat counter
 
         self._plc = None    # pyads.Connection, created in start()
         self._timer = None  # QTimer, created in start()
@@ -157,6 +165,12 @@ class AdsWorker(QObject):
             # per tag. This means the UI updates atomically — you never
             # render a frame showing a new PT1 next to a stale PT2.
             self.data_updated.emit(values)
+
+            # HMI -> PLC heartbeat. FB_Hmi watches this value; if it stops
+            # changing for T_HMI_HEARTBEAT_TIMEOUT (5 s), the PLC declares comm loss.
+            self._hb = (self._hb + 1) & 0xFFFFFFFF          # wrap like a UDINT
+            self._plc.write_by_name("GVL_HMI.stHmiCommand.nHmiHeartbeat",
+                                    self._hb, pyads.PLCTYPE_UDINT)
 
         except pyads.ADSError as e:
             # A read failure almost always means the link died. Mark it down,
