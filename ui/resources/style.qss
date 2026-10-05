@@ -15,6 +15,7 @@ QLabel{
 
 QPushButton {
     font-family: __proj_font__;
+    font-size: __H2-font-size__;
     color: __button_font_color__;
     background-color: __button_bg_color__;
     border: __button_border__;
@@ -57,25 +58,83 @@ QWidget#RunPage {
     border-radius: __widget_border_radius__;
 }
 
-QPushButton#PLC_bCmdDelivery {
-    font-size: __B1-font-size__;
-    background-color: __button_bg_color__;
-    border: __button_border__;
+
+
+QSlider#horizontalSlider {
+    min-height: 60px;                    /* overall touch target */
 }
-QPushButton#PLC_bCmdDelivery:checked {
-    background-color: #00ca3d;
-    border: __button_border_checked__;
+QSlider#horizontalSlider::groove:horizontal {
+    height: 16px;
+    border-radius: 8px;
+    background: #555555;
+}
+QSlider#horizontalSlider::sub-page:horizontal {
+    background: #2a82da;                 /* filled part, left of the handle */
+    border-radius: 8px;
+}
+QSlider#horizontalSlider::handle:horizontal {
+    width: 48px;
+    height: 48px;
+    margin: -16px 0;                     /* (handle 48 - groove 16) / 2, centers it */
+    border-radius: 24px;                 /* half the width = circle */
+    background: #ffffff;
+    border: 2px solid #2a82da;
 }
 
+/* Unlocked, off */
 QPushButton#PLC_bCmdSes {
     font-size: __B1-font-size__;
     background-color: __button_bg_color__;
     border: __button_border__;
 }
+
+/* Unlocked, on */
 QPushButton#PLC_bCmdSes:checked {
     background-color: #00ca3d;
     border: __button_border_checked__;
 }
+
+/* Locked, off */
+QPushButton#PLC_bCmdSes:disabled {
+    background-color: #2a2a2a;
+    color: #777777;
+    border: 2px dashed #555555;
+}
+
+/* Locked, on (e.g. system running, but the button can't be used in this state) */
+QPushButton#PLC_bCmdSes:checked:disabled {
+    background-color: #1f4f80;
+    color: #aaaaaa;
+    border: 2px dashed #555555;
+}
+
+/* Unlocked, off */
+QPushButton#PLC_bCmdDelivery {
+    font-size: __B1-font-size__;
+    background-color: __button_bg_color__;
+    border: __button_border__;
+}
+
+/* Unlocked, on */
+QPushButton#PLC_bCmdDelivery:checked {
+    background-color: #00ca3d;
+    border: __button_border_checked__;
+}
+
+/* Locked, off */
+QPushButton#PLC_bCmdDelivery:disabled {
+    background-color: #2a2a2a;
+    color: #777777;
+    border: 2px dashed #555555;
+}
+
+/* Locked, on (e.g. system running, but the button can't be used in this state) */
+QPushButton#PLC_bCmdDelivery:checked:disabled {
+    background-color: #1f4f80;
+    color: #aaaaaa;
+    border: 2px dashed #555555;
+}
+
 
 /* ---------- ALARM SCREEN STYLES ----------  */
 QTableView#AlarmTable {

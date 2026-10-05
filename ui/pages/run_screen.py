@@ -6,7 +6,9 @@ from PySide6.QtUiTools import QUiLoader
 class RunScreen(QWidget):
     # EXAMPLE BUTTON HMI_bRun = Signal(bool)          # carries the checked state
     flow_setpoint_changed = Signal(float)   # SLM, emitted when the operator commits a value
-
+    ses_toggled = Signal(bool)   # True = SES On requested, False = SES Off requested
+    delivery_toggled = Signal(bool)   # True = Delivery On requested, False = Delivery Off requested
+    CONTROL_UNLOCKED_STATES = {"SteamFlowing"}   # states where the System button can be used
 
     def __init__(self):
         super().__init__()
@@ -28,7 +30,6 @@ class RunScreen(QWidget):
         container_layout = QVBoxLayout(self)
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(self.ui)
-
 
         # change text on button presses
         self.ui.PLC_bCmdSes.toggled.connect(
@@ -53,6 +54,10 @@ class RunScreen(QWidget):
         t.setSelectionMode(QAbstractItemView.NoSelection)   
         self._last_faults = None
 
+        # set up button signals
+        self.ui.PLC_bCmdSes.toggled.connect(self.ses_toggled.emit)
+        self.ui.PLC_bCmdDelivery.toggled.connect(self.delivery_toggled.emit)
+
         # EXAMPLE BUTTON self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
         
 
@@ -62,13 +67,17 @@ class RunScreen(QWidget):
     @Slot(dict)
     def update_values(self, values: dict):
         self.ui.PLC_nSteamFlowMeasured.setText(str(values['PLC_nSteamFlowMeasured']))
-
         faults = tuple((values[f"PLC_sFault{i}"], values[f"PLC_sFaultTime{i}"]) for i in range(1, 6))
         if faults != self._last_faults:          # only redraw when the list actually changes
             self._last_faults = faults
             for row, (name, ts) in enumerate(faults):
                 self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(name))
                 self.ui.tableWidget.setItem(row, 1, QTableWidgetItem(ts))
+
+        state = values["PLC_sMachineState"]
+        self.ui.PLC_bCmdSes.setEnabled(state in self.CONTROL_UNLOCKED_STATES)
+        self.ui.PLC_bCmdDelivery.setEnabled(state in self.CONTROL_UNLOCKED_STATES)
+
 
     @Slot(int)
     def _on_flow_slider_committed(self, value: int):

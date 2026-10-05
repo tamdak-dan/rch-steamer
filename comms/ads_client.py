@@ -12,6 +12,7 @@ TAG_MAP = {
     "PLC_nHeartbeat": ("GVL_HMI.stHmiStatus.nPlcHeartbeat", pyads.PLCTYPE_UDINT),  # heartbeat counter
     "PLC_sMachineState": ("GVL_HMI.stHmiStatus.sStateName", pyads.PLCTYPE_STRING), # machine state
     "PLC_bAnyFault": ("GVL_HMI.stHmiStatus.stFaults.bAnyFault", pyads.PLCTYPE_BOOL),   # fault indicator
+    "PLC_bFaultReset": ("GVL_HMI.stHmiCommand.bFaultReset", pyads.PLCTYPE_BOOL),  # reset pulse
 
     #run screen
     "PLC_nSteamFlowMeasured": ("GVL_HMI.stHmiStatus.stProcess.rFlowActual", pyads.PLCTYPE_REAL),   # calculated flow

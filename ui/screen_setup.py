@@ -61,18 +61,18 @@ class MainWindow(QMainWindow):
         APPLICATION_STYLE = {
             "__main_bg_color__": "#181818",  # Light gray background to save RPI rendering power
             "__proj_font__": "'Roboto', 'Arial', sans-serif",  # Main font for the project
-            "__proj_font_color__": "#D1D1D1",  # Main font color for the project
-            "__widget_bg_color__": "#484848",  # White background for screens
+            "__proj_font_color__": "#FFFFFF",  # Main font color for the project
+            "__widget_bg_color__": "#444444FF",  # White background for screens
             "__widget_border__": "2px solid #000000",  # Black border for widgets
             "__widget_border_radius__": "5px",  # Rounded corners for widgets
-            "__button_bg_color__": "#acacac",  # Background color for buttons
+            "__button_bg_color__": "#4b7bcd",  # Background color for buttons
             "__button_font_color__": "#000000",  # Font color for buttons
             "__button_border__": "2px solid #000000",  # Border for buttons
             "__button_border_checked__": "2px solid #ffffff",  # Border for buttons
             "__button_border_radius__": "5px",  # Rounded corners for buttons
             "__H1-font-size__": "22px",  # Font size for H1 headers
             "__H2-font-size__": "18px",  # Font size for H2 headers
-            "__B1-font-size__": "16px",  # Font size for body text
+            "__B1-font-size__": "18px",  # Font size for body text
         }
 
         # open css files and replace style vars with actual values
@@ -91,18 +91,19 @@ class MainWindow(QMainWindow):
             poll_ms=250,
         )
 
-        self.run_screen.flow_setpoint_changed.connect(
-            lambda sp: self.ads.write("PLC_nSteamFlowStpt", sp))
+        self.ads.data_updated.connect(self.run_screen.update_values)
+        self.run_screen.flow_setpoint_changed.connect(lambda sp: self.ads.write("PLC_nSteamFlowStpt", sp))
+        self.run_screen.ses_toggled.connect(lambda on: self.ads.write("PLC_bSesOn" if on else "PLC_bSesOff", True))
+        self.run_screen.delivery_toggled.connect(lambda on: self.ads.write("PLC_bDeliveryOn" if on else "PLC_bDeliveryOff", True))
 
         # setup PLC tags
         # EXAMPLE BUTTON self.run_screen.HMI_bRun.connect(lambda checked: self.ads.write("HMI_bRun", checked))
 
-        self.ads.data_updated.connect(self.run_screen.update_values)
+
         self.ads.connection_changed.connect(self._on_connection_changed)
         self.ads.data_updated.connect(self.navigation_bar.update_values)
         self.ads.connection_changed.connect(self.navigation_bar.set_connected)
 
-        
         self.ads.error_occurred.connect(lambda msg: print(msg))
         self.ads.start()
 
