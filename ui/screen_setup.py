@@ -7,6 +7,7 @@ from ui.pages.run_screen import RunScreen
 from ui.pages.alarm_screen import AlarmScreen
 from ui.pages.maint_screen import MaintScreen
 from ui.pages.navigation_widget import NavigationWidget
+from ui.pages.system_screen import SystemScreen
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,13 +31,14 @@ class MainWindow(QMainWindow):
 
         # Instantiate and register screens
         self.run_screen = RunScreen()
-        self.run_screen1 = RunScreen() # --- IGNORE ---
         self.alarm_screen = AlarmScreen()
         self.maint_screen = MaintScreen()
+        self.system_screen = SystemScreen()
 
         self.stacked_widget.addWidget(self.run_screen)   # index 0
         self.stacked_widget.addWidget(self.alarm_screen) # index 1
         self.stacked_widget.addWidget(self.maint_screen) # index 2
+        self.stacked_widget.addWidget(self.system_screen) # index 3
 
 
         # Show the first screen
@@ -48,6 +50,7 @@ class MainWindow(QMainWindow):
 
         # link the navigation signals from nav screen to the stack's setCurrentIndex method
         self.navigation_bar.navigate_to.connect(self.stacked_widget.setCurrentIndex)
+        self.stacked_widget.currentChanged.connect(self.navigation_bar.set_active_page)
 
         # add widgets to the main layout
         main_layout.addWidget(self.navigation_bar, stretch=1)
@@ -62,10 +65,11 @@ class MainWindow(QMainWindow):
             "__main_bg_color__": "#181818",  # Light gray background to save RPI rendering power
             "__proj_font__": "'Roboto', 'Arial', sans-serif",  # Main font for the project
             "__proj_font_color__": "#FFFFFF",  # Main font color for the project
-            "__widget_bg_color__": "#444444FF",  # White background for screens
+            "__widget_bg_color__": "#757575",  # White background for screens
             "__widget_border__": "2px solid #000000",  # Black border for widgets
             "__widget_border_radius__": "5px",  # Rounded corners for widgets
             "__button_bg_color__": "#4b7bcd",  # Background color for buttons
+            "__button_bg_neutral__": "#585858",  # Neutral background color for buttons
             "__button_font_color__": "#000000",  # Font color for buttons
             "__button_border__": "2px solid #000000",  # Border for buttons
             "__button_border_checked__": "2px solid #ffffff",  # Border for buttons

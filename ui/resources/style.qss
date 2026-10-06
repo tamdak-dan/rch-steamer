@@ -32,21 +32,32 @@ QWidget#NavigationWidget {
     border-radius: 0px;
 }
 
+QWidget#NavigationWidget QPushButton {
+    font-family: __proj_font__;
+    font-size: __H2-font-size__;
+    color: __proj_font_color__;
+    background-color: __button_bg_neutral__;
+    border: __button_border__;
+    border-radius: __button_border_radius__;
+} 
+
+QLabel#PLC_sMachineState {
+    padding: 4px 14px; border-radius: 12px;
+    background-color: #555555; font-weight: bold;
+}
+QLabel#PLC_sMachineState[cat="run"]   { background-color: #1e8e3e; }
+QLabel#PLC_sMachineState[cat="startup"] { background-color: #c77c00; }
+QLabel#PLC_sMachineState[cat="fault"] { background-color: #c62828; }
+
+QWidget#NavigationWidget QPushButton:checked {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #ffffff;
+}
+
 QLabel#ProjectTitle {
     font-size: __H1-font-size__;
     color: #ffffff;
-}
-
-QLabel#Alarm_LED {
-    border: 1px solid #ffffff;
-    border-radius: 10px;
-    background-color: #7a7a7a;          /* default / no comms: grey */
-}
-QLabel#Alarm_LED[state="ok"] {
-    background-color: #00c040;          /* green */
-}
-QLabel#Alarm_LED[state="alarm"] {
-    background-color: #ff0000;          /* red */
 }
 
 /* ---------- RUN SCREEN STYLES ----------  */
@@ -58,7 +69,16 @@ QWidget#RunPage {
     border-radius: __widget_border_radius__;
 }
 
-
+QLabel#PLC_nSteamFlowMeasured { 
+    font-size: 28px; 
+    font-weight: bold;
+    font-family: __proj_font__
+}
+QLabel#PLC_nSteamFlowStpt { 
+    font-size: 28px;
+    font-weight: bold;
+    font-family: __proj_font__
+}
 
 QSlider#horizontalSlider {
     min-height: 60px;                    /* overall touch target */
@@ -135,6 +155,15 @@ QPushButton#PLC_bCmdDelivery:checked:disabled {
     border: 2px dashed #555555;
 }
 
+QTableWidget#tableWidget {
+    font-size: __B1-font-size__;
+}
+
+/* The header row is a separate widget and doesn't inherit the table's font */
+QTableWidget#tableWidget QHeaderView::section {
+    font-size: __B1-font-size__;
+    font-weight: bold;
+}
 
 /* ---------- ALARM SCREEN STYLES ----------  */
 QTableView#AlarmTable {

@@ -1,9 +1,14 @@
-from PySide6.QtWidgets import QHBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QWidget, QButtonGroup
 from PySide6.QtCore import Signal, QFile, Slot
 from PySide6.QtUiTools import QUiLoader
 
 class NavigationWidget(QWidget):
     navigate_to = Signal(int)
+
+    STATE_CAT = {"SteamFlowing": "run", "Fault": "fault",
+                 "FillWater": "startup", "PurgeVessel": "startup",
+                 "SetDiffPressure": "startup", "InitMain": "startup", "CheckIfHot": "startup"}
+    
 
     def __init__(self):
         super().__init__()
@@ -23,30 +28,50 @@ class NavigationWidget(QWidget):
         nav_layout.addWidget(self.ui)  
         nav_layout.setContentsMargins(0, 0, 0, 5)
 
+
+        # 3. Navigation buttons as an exclusive group: one is always "checked"
+        self.nav_group = QButtonGroup(self)
+        self.nav_group.setExclusive(True)
+
+        # id = the page's index in the QStackedWidget
+        for btn, page in ((self.ui.btn_to_RunScreen, 0),
+                          (self.ui.btn_to_MaintScreen, 2),
+                          (self.ui.btn_to_SystemScreen, 3)):
+            btn.setCheckable(True)
+            self.nav_group.addButton(btn, page)
+
+        self.nav_group.idClicked.connect(self.navigate_to.emit)
+        self.ui.btn_to_RunScreen.setChecked(True)     # app starts on the run screen
+
+
         # 3. Set up navigation buttons
         # From any screen, go to run screen
-        self.ui.btn_to_RunScreen.clicked.connect(lambda: self.navigate_to.emit(0))
+        #self.ui.btn_to_RunScreen.clicked.connect(lambda: self.navigate_to.emit(0))
         # From any screen, go to alarm screen
         #self.ui.btn_to_AlarmScreen.clicked.connect(lambda: self.navigate_to.emit(1))
         # From any screen, go to maintenance screen
         #self.ui.btn_to_MaintScreen.clicked.connect(lambda: self.navigate_to.emit(2))
 
-    # alarm LED function for changing colors/states
-    def _set_led(self, state: str):
-        led = self.ui.Alarm_LED
-        if led.property("state") == state:
-            return                          # skip restyling every 250 ms poll
-        led.setProperty("state", state)
-        led.style().unpolish(led)           # make Qt re-read the stylesheet
-        led.style().polish(led)
 
     @Slot(dict)
     def update_values(self, values: dict):
-        self.ui.PLC_sMachineState.setText(values["PLC_sMachineState"])
-        self._set_led("alarm" if values["PLC_bAnyFault"] else "ok")
+        state = values["PLC_sMachineState"]
+        self.ui.PLC_sMachineState.setText(state)
+
+        cat = self.STATE_CAT.get(state, "idle")
+        lbl = self.ui.PLC_sMachineState
+        if lbl.property("cat") != cat:
+            lbl.setProperty("cat", cat)
+            lbl.style().unpolish(lbl)
+            lbl.style().polish(lbl)
 
     @Slot(bool)
     def set_connected(self, connected: bool):
         if not connected:
             self.ui.PLC_sMachineState.setText("PLC Disconnected")
-            self._set_led("unknown")        # no matching rule, so it falls back to grey
+
+    @Slot(int)
+    def set_active_page(self, index: int):
+        btn = self.nav_group.button(index)
+        if btn:
+            btn.setChecked(True)
