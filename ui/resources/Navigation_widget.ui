@@ -74,6 +74,9 @@
        <property name="spacing">
         <number>0</number>
        </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
@@ -109,7 +112,7 @@
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignmentFlag::AlignRight">
+       <item>
         <widget class="QLabel" name="PLC_sMachineState">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -117,8 +120,17 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>25</height>
+          </size>
+         </property>
          <property name="text">
           <string>Not Initialized</string>
+         </property>
+         <property name="margin">
+          <number>0</number>
          </property>
          <property name="indent">
           <number>0</number>

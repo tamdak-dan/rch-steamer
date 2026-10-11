@@ -53,8 +53,8 @@ class MainWindow(QMainWindow):
         self.stacked_widget.currentChanged.connect(self.navigation_bar.set_active_page)
 
         # add widgets to the main layout
-        main_layout.addWidget(self.navigation_bar, stretch=1)
-        main_layout.addWidget(self.stacked_widget, stretch=3)
+        main_layout.addWidget(self.navigation_bar, 0)
+        main_layout.addWidget(self.stacked_widget, 1)
 
         self.apply_styles()
         self._setup_comms()
@@ -70,13 +70,14 @@ class MainWindow(QMainWindow):
             "__widget_border_radius__": "5px",  # Rounded corners for widgets
             "__button_bg_color__": "#4b7bcd",  # Background color for buttons
             "__button_bg_neutral__": "#585858",  # Neutral background color for buttons
-            "__button_font_color__": "#000000",  # Font color for buttons
+            "__button_font_color__": "#FFFFFF",  # Font color for buttons
             "__button_border__": "2px solid #000000",  # Border for buttons
             "__button_border_checked__": "2px solid #ffffff",  # Border for buttons
             "__button_border_radius__": "5px",  # Rounded corners for buttons
             "__H1-font-size__": "22px",  # Font size for H1 headers
             "__H2-font-size__": "18px",  # Font size for H2 headers
             "__B1-font-size__": "18px",  # Font size for body text
+            "__B2-font-size__": "12px",  # Font size for body text
         }
 
         # open css files and replace style vars with actual values

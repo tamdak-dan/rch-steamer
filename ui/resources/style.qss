@@ -17,7 +17,7 @@ QPushButton {
     font-family: __proj_font__;
     font-size: __H2-font-size__;
     color: __button_font_color__;
-    background-color: __button_bg_color__;
+    background-color: __button_bg_neutral__;
     border: __button_border__;
     border-radius: __button_border_radius__;
 } 
@@ -70,13 +70,12 @@ QWidget#RunPage {
 }
 
 QLabel#PLC_nSteamFlowMeasured { 
-    font-size: 28px; 
+    font-size: 46px; 
     font-weight: bold;
     font-family: __proj_font__
 }
 QLabel#PLC_nSteamFlowStpt { 
-    font-size: 28px;
-    font-weight: bold;
+    font-size: __B1-font-size__;
     font-family: __proj_font__
 }
 
@@ -156,26 +155,71 @@ QPushButton#PLC_bCmdDelivery:checked:disabled {
 }
 
 QTableWidget#tableWidget {
-    font-size: __B1-font-size__;
+    font-size: __B2-font-size__;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 0px 8px;
 }
 
 /* The header row is a separate widget and doesn't inherit the table's font */
 QTableWidget#tableWidget QHeaderView::section {
-    font-size: __B1-font-size__;
+    font-size: __B2-font-size__;
     font-weight: bold;
 }
 
 /* ---------- ALARM SCREEN STYLES ----------  */
-QTableView#AlarmTable {
-    font-family: __proj_font__;
-    font-size: __H1-font-size__;
-    border: __widget_border__;
-    border-radius: __widget_border_radius__;
-    background-color: #b12828;           /* odd (normal) rows */
-    alternate-background-color: #b4b4b4c2; /* even rows */
-    gridline-color: #050a13;
-    selection-background-color: #185FA5;
-    selection-color: #850f0f;
-}
+
 
 /* ---------- MAINTENANCE SCREEN STYLES ----------  */
+QWidget#MaintPage {
+    font-family: __proj_font__;
+    font-size: __H1-font-size__;
+    background-color: __widget_bg_color__;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+}
+
+QLabel#lbl_MaintHint, QLabel#lbl_ValveNote {
+    font-size: 14px;
+    color: #e8e8e8;
+}
+
+/* Every maintenance toggle carries the dynamic property maint=true (set in the .ui),
+   so one set of rules covers all of them. Same four states as the run page buttons. */
+
+/* Unlocked, off */
+QPushButton[maint="true"] {
+    font-size: 16px;
+    background-color: __button_bg_color__;
+    border: __button_border__;
+}
+
+/* Unlocked, on */
+QPushButton[maint="true"]:checked {
+    background-color: #00ca3d;
+    border: __button_border_checked__;
+}
+
+/* Locked, off */
+QPushButton[maint="true"]:disabled {
+    background-color: #2a2a2a;
+    color: #777777;
+    border: 2px dashed #555555;
+}
+
+/* Locked, on */
+QPushButton[maint="true"]:checked:disabled {
+    background-color: #1f4f80;
+    color: #aaaaaa;
+    border: 2px dashed #555555;
+}
+
+QTableWidget#tbl_MaintReadings {
+    font-size: 16px;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+}
+
+QTableWidget#tbl_MaintReadings::item {
+    border-bottom: 1px solid #d0d0d0;
+    padding: 0px 8px;
+}

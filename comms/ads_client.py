@@ -22,8 +22,14 @@ TAG_MAP = {
     "PLC_bDeliveryOn": ("GVL_HMI.stHmiCommand.bSteamDeliveryOn", pyads.PLCTYPE_BOOL),  # delivery ON command indicator
     "PLC_bDeliveryOff": ("GVL_HMI.stHmiCommand.bSteamDeliveryOff", pyads.PLCTYPE_BOOL),  # delivery OFF command indicator
 
-    #
-    
+    #maint screen
+    "PLC_bMaintSV1": ("GVL_HMI.stHmiCommand.aValveCmd[1]", pyads.PLCTYPE_BOOL),
+    "PLC_bMaintSV2": ("GVL_HMI.stHmiCommand.aValveCmd[2]", pyads.PLCTYPE_BOOL),
+    "PLC_bMaintSV3": ("GVL_HMI.stHmiCommand.aValveCmd[3]", pyads.PLCTYPE_BOOL),
+    "PLC_bMaintSV4": ("GVL_HMI.stHmiCommand.aValveCmd[4]", pyads.PLCTYPE_BOOL),
+    "PLC_bMaintDrainMode": ("GVL_HMI.stHmiCommand.bDrainMode", pyads.PLCTYPE_BOOL),
+    #"PLC_bMaintLoopback": ("GVL_HMI.stHmiCommand.", pyads.PLCTYPE_BOOL),
+    "PLC_bMaintInitPurge": ("GVL_HMI.stHmiSetpoints.bSetPurgeOnStartup", pyads.PLCTYPE_BOOL),
 
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),

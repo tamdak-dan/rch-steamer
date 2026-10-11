@@ -1,14 +1,57 @@
-from PySide6.QtWidgets import QAbstractItemView, QHBoxLayout, QHeaderView, QSizePolicy, QTableWidgetItem, QVBoxLayout, QWidget, QAbstractScrollArea
-from PySide6.QtCore import Signal, QFile, Slot
-from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QAbstractItemView, QHBoxLayout, QHeaderView, QSizePolicy, QStyledItemDelegate, QTableWidgetItem, QVBoxLayout, QWidget, QAbstractScrollArea, QStyleOptionViewItem, QStyle
+from PySide6.QtCore import Qt, Signal, QFile, Slot
+from PySide6.QtUiTools import QUiLoader 
+from PySide6.QtGui import QColor, QPainter, QPalette
+from PySide6.QtCore import QRectF, Qt
 
+# Delegate for painting alarm tags in the fault table
+class AlarmTagDelegate(QStyledItemDelegate):
+    TAG_W = 5          # bar width
+    TAG_INSET = 4      # gap from table edge and from top/bottom of the row
+    TEXT_GAP = 10      # gap between bar and text
+    TAG_COLOR = QColor("#c62828")
+
+    def paint(self, painter, option, index):
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        text = opt.text
+
+        # 1. draw the cell background/border with no text
+        opt.text = ""
+        style = opt.widget.style() if opt.widget else None
+        style.drawControl(QStyle.CE_ItemViewItem, opt, painter, opt.widget)
+
+        if not text:
+            return
+
+        r = option.rect
+        painter.save()
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # 2. rounded tag
+        tag = QRectF(r.left() + self.TAG_INSET, r.top() + self.TAG_INSET,
+                     self.TAG_W, r.height() - 2 * self.TAG_INSET)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(self.TAG_COLOR)
+        painter.drawRoundedRect(tag, self.TAG_W / 2, self.TAG_W / 2)
+
+        # 3. text, offset past the tag, with "..." if it doesn't fit
+        text_rect = r.adjusted(self.TAG_INSET + self.TAG_W + self.TEXT_GAP, 0, -4, 0)
+        painter.setPen(opt.palette.color(QPalette.Text))
+        painter.setFont(opt.font)
+        elided = opt.fontMetrics.elidedText(text, Qt.ElideRight, text_rect.width())
+        painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignVCenter, elided)
+
+        painter.restore()
 
 class RunScreen(QWidget):
     # EXAMPLE BUTTON HMI_bRun = Signal(bool)          # carries the checked state
     flow_setpoint_changed = Signal(float)   # SLM, emitted when the operator commits a value
     ses_toggled = Signal(bool)   # True = SES On requested, False = SES Off requested
     delivery_toggled = Signal(bool)   # True = Delivery On requested, False = Delivery Off requested
-    CONTROL_UNLOCKED_STATES = {"SteamFlowing"}   # states where the System button can be used
+    DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the System button can be used
+    SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
+                           "SetDiffPressure", "InitMain", "SteamFlowing"}   # states where the SES button can be used
 
     def __init__(self):
         super().__init__()
@@ -17,7 +60,7 @@ class RunScreen(QWidget):
     def _setup_ui(self):
         # 1. Open the .ui file safely
         #ui_file_path = "ui/resources/RunPage_widget.ui"                ui_file_path = "ui/resources/RunPage_widget.ui"
-        ui_file_path = "ui/resources/RunPage_test3.ui"
+        ui_file_path = "ui/resources/RunPage_test4.ui"
         ui_file = QFile(ui_file_path)
 
         # 2. Instantiate the loader and load the layout
@@ -44,14 +87,18 @@ class RunScreen(QWidget):
         self.ui.horizontalSlider.valueChanged.connect(self._on_flow_slider_committed)
 
         # setup fault table
+        ROW_H = 30
         t = self.ui.tableWidget
         t.setColumnCount(2)
         t.setRowCount(5)
-        t.setHorizontalHeaderLabels(["Fault", "Time"])
+        t.setFixedHeight(ROW_H * t.rowCount() + 2 * t.frameWidth())
+        t.horizontalHeader().setVisible(False)
         t.verticalHeader().setVisible(False)
+        t.setShowGrid(False)
         t.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         t.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        t.setSelectionMode(QAbstractItemView.NoSelection)   
+        t.setSelectionMode(QAbstractItemView.NoSelection)
+        t.setItemDelegateForColumn(0, AlarmTagDelegate(t))   
         self._last_faults = None
 
         # set up button signals
@@ -75,8 +122,15 @@ class RunScreen(QWidget):
                 self.ui.tableWidget.setItem(row, 1, QTableWidgetItem(ts))
 
         state = values["PLC_sMachineState"]
-        self.ui.PLC_bCmdSes.setEnabled(state in self.CONTROL_UNLOCKED_STATES)
-        self.ui.PLC_bCmdDelivery.setEnabled(state in self.CONTROL_UNLOCKED_STATES)
+        self.ui.PLC_bCmdSes.setEnabled(state in self.SES_UNLOCKED_STATES)
+        self.ui.PLC_bCmdDelivery.setEnabled(state in self.DELIVERY_UNLOCKED_STATES)
+
+        # right justify the fault times
+        for row, (name, ts) in enumerate(faults):
+            self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(name))
+            time_item = QTableWidgetItem(ts)
+            time_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.ui.tableWidget.setItem(row, 1, time_item)
 
 
     @Slot(int)
