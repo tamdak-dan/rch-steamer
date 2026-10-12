@@ -39,6 +39,12 @@ TAG_MAP = {
     "PLC_rTC3": ("GVL_HMI.stHmiStatus.stProcess.rTc3External", pyads.PLCTYPE_REAL),
     "PLC_rTC4": ("GVL_HMI.stHmiStatus.stProcess.rTc4Delivery", pyads.PLCTYPE_REAL),
 
+    # system screen: PLC clock (TwinCAT DT = seconds since 1970-01-01, PLC local time)
+    "PLC_dtNow":         ("GVL_HMI.stHmiStatus.dtNow", pyads.PLCTYPE_DT),
+    "PLC_dtSetTime":     ("GVL_HMI.stHmiCommand.dtSetTime", pyads.PLCTYPE_DT),
+    "PLC_bSetTime":      ("GVL_HMI.stHmiCommand.bSetTime", pyads.PLCTYPE_BOOL),
+    "PLC_nSetTimeState": ("GVL_HMI.stHmiStatus.nSetTimeState", pyads.PLCTYPE_INT),   # 0 idle, 1 busy, 2 done, 3 error
+
 
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),

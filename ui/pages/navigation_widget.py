@@ -16,7 +16,7 @@ class NavigationWidget(QWidget):
 
     def _setup_ui(self):
         # 1. Open the .ui file safely
-        ui_file_path = "ui/resources/Navigation_widget_test.ui"
+        ui_file_path = "ui/resources/Navigation_widget.ui"
         ui_file = QFile(ui_file_path)
 
         # 2. Instantiate the loader and load the layout
@@ -35,8 +35,8 @@ class NavigationWidget(QWidget):
 
         # id = the page's index in the QStackedWidget
         for btn, page in ((self.ui.btn_to_RunScreen, 0),
-                          (self.ui.btn_to_MaintScreen, 2),
-                          (self.ui.btn_to_SystemScreen, 3)):
+                          (self.ui.btn_to_MaintScreen, 1),
+                          (self.ui.btn_to_SystemScreen, 2)):
             btn.setCheckable(True)
             self.nav_group.addButton(btn, page)
 

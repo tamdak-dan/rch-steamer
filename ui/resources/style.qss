@@ -217,3 +217,97 @@ QTableWidget#tbl_MaintReadings::item {
     border-bottom: 1px solid #d0d0d0;
     padding: 0px 8px;
 }
+
+/* ---------- SYSTEM SCREEN STYLES ----------  */
+QWidget#SystemPage {
+    font-family: __proj_font__;
+    font-size: __H1-font-size__;
+    background-color: __widget_bg_color__;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+}
+
+QLabel#lbl_CurrentTime {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* small helper / status text; status property is set from system_screen.py */
+QLabel[hint="true"] {
+    font-size: 14px;
+    color: #e8e8e8;
+}
+QLabel[hint="true"][status="ok"]   { color: #9be7a8; }
+QLabel[hint="true"][status="warn"] { color: #ffd27a; }
+
+/* tappable value fields: look like inputs, open the touch keypad */
+QPushButton[field="true"] {
+    font-size: __B1-font-size__;
+    color: #111111;
+    background-color: #ffffff;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+    text-align: left;
+    padding-left: 10px;
+}
+QPushButton[field="true"]:pressed {
+    border: 2px solid #2a82da;
+}
+QPushButton[field="true"]:disabled {
+    color: #777777;
+    background-color: #2a2a2a;
+    border: 2px dashed #555555;
+}
+
+/* action buttons and the 25/50 model buttons: same four states as the maint toggles */
+QPushButton[sys="true"] {
+    font-size: 16px;
+    background-color: __button_bg_color__;
+    border: __button_border__;
+}
+QPushButton[sys="true"]:checked {
+    background-color: #00ca3d;
+    border: __button_border_checked__;
+}
+QPushButton[sys="true"]:disabled {
+    background-color: #2a2a2a;
+    color: #777777;
+    border: 2px dashed #555555;
+}
+QPushButton[sys="true"]:checked:disabled {
+    background-color: #1f4f80;
+    color: #aaaaaa;
+    border: 2px dashed #555555;
+}
+
+/* ---------- TOUCH KEYPAD / CONFIRM DIALOGS ----------  */
+QDialog#TouchDialog {
+    background-color: __widget_bg_color__;
+    border: 2px solid #ffffff;
+    border-radius: __widget_border_radius__;
+}
+QLabel#td_Title {
+    font-size: __H2-font-size__;
+}
+QLabel#td_Message {
+    font-size: 16px;
+}
+QLabel#td_Display {
+    font-size: 24px;
+    color: #111111;
+    background-color: #ffffff;
+    border: __widget_border__;
+    border-radius: __widget_border_radius__;
+    padding: 0px 10px;
+}
+QPushButton#td_Key {
+    font-size: 22px;
+}
+QPushButton#td_Ok {
+    background-color: __button_bg_color__;
+}
+QPushButton#td_Ok:disabled {
+    background-color: #2a2a2a;
+    color: #777777;
+    border: 2px dashed #555555;
+}

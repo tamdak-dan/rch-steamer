@@ -19,20 +19,20 @@ class MaintScreen(QWidget):
     # button object name: (feedback key, label, on text, off text)
     # The button object name doubles as the command key in TAG_MAP, same as the run screen.
     OUTPUTS = {
-        "PLC_bMaintSV1":       ("PLC_bSV1",              "SV-1 Drain",     "Open",    "Closed"),
-        "PLC_bMaintSV2":       ("PLC_bSV2",              "SV-2 Main",      "Open",    "Closed"),
-        "PLC_bMaintSV3":       ("PLC_bSV3",              "SV-3 Steam out", "Open",    "Closed"),
-        "PLC_bMaintSV4":       ("PLC_bSV4",              "SV-4 Water in",  "Open",    "Closed"),
-        "PLC_bMaintDrainMode": (None,                    "Drain mode",     "Running", "N2 under 5 psig"),
-        "PLC_bMaintLoopback":  ("PLC_bLoopbackOn",       "Loopback test",  "Active",  "DSUB15"),
-        "PLC_bMaintInitPurge": ("PLC_bInitPurgeEnabled", "Init purge",     "On",      "Off"),
+        "PLC_bMaintSV1":       ("PLC_bMaintSV1",              "SV-1 Drain",     "Open",    "Closed"),
+        "PLC_bMaintSV2":       ("PLC_bMaintSV2",              "SV-2 Main",      "Open",    "Closed"),
+        "PLC_bMaintSV3":       ("PLC_bMaintSV3",              "SV-3 Steam out", "Open",    "Closed"),
+        "PLC_bMaintSV4":       ("PLC_bMaintSV4",              "SV-4 Water in",  "Open",    "Closed"),
+        "PLC_bMaintDrainMode": ("PLC_bMaintDrainMode",        "Drain mode",     "Running", "N2 under 5 psig"),
+        #"PLC_bMaintLoopback":  ("PLC_bLoopbackOn",       "Loopback test",  "Active",  "DSUB15"),
+        "PLC_bMaintInitPurge": ("PLC_bMaintInitPurge", "Init purge",     "On",      "Off"),
     }
 
     # readings table rows: (label, value key)
     READINGS = (
         ("PT-1 upstream",   "PLC_rPT1"),
         ("PT-2 downstream", "PLC_rPT2"),
-        ("Flow Rate",        "PLC_nSteamFlowMeasured"),          # calculated from PT-1 and PT-2
+        ("Flow Rate",        "PLC_nSteamFlowMeasured"),
         ("LS-1 low water", "PLC_bLS1"),
         ("LS-3 empty water", "PLC_bLS3"),
         ("TC-1 SPA",        "PLC_rTC1"),
@@ -50,7 +50,7 @@ class MaintScreen(QWidget):
 
     def _setup_ui(self):
         # 1. Open the .ui file safely
-        ui_file_path = "ui/resources/MaintPage_widget_test.ui"
+        ui_file_path = "ui/resources/MaintPage_widget.ui"
         ui_file = QFile(ui_file_path)
 
         # 2. Instantiate the loader and load the layout
@@ -105,7 +105,7 @@ class MaintScreen(QWidget):
         self._apply_lock(self._in_maint, state)
 
         # output feedback comes from the PLC, never from the button's own toggle
-        sv = {i: bool(values[f"PLC_bSV{i}"]) for i in range(1, 5)}
+        sv = {i: bool(values[f"PLC_bMaintSV{i}"]) for i in range(1, 5)}
         for name, (fb_key, label, on_text, off_text) in self.OUTPUTS.items():
             if fb_key is None:
                 # drain mode = SV-1, SV-2, SV-4 open and SV-3 closed (same test as the legacy PLC)
@@ -158,6 +158,8 @@ class MaintScreen(QWidget):
                     item.setForeground(self.COLOR_OK if diff <= self.PT_CHECK_TORR else self.COLOR_WARN)
                 else:
                     item.setText("Hot, n/a")
+            elif key.startswith("PLC_nSteam"):
+                item.setText(f"{values[key]:.0f} SLM")
             elif key.startswith("PLC_rPT"):
                 item.setText(f"{values[key]:.0f} Torr")
             elif key.startswith("PLC_rTC"):

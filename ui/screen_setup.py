@@ -4,7 +4,6 @@ from comms.ads_client import AdsClient
 
 # Import the custom pages from your subfolders
 from ui.pages.run_screen import RunScreen
-from ui.pages.alarm_screen import AlarmScreen
 from ui.pages.maint_screen import MaintScreen
 from ui.pages.navigation_widget import NavigationWidget
 from ui.pages.system_screen import SystemScreen
@@ -31,14 +30,12 @@ class MainWindow(QMainWindow):
 
         # Instantiate and register screens
         self.run_screen = RunScreen()
-        self.alarm_screen = AlarmScreen()
         self.maint_screen = MaintScreen()
         self.system_screen = SystemScreen()
 
         self.stacked_widget.addWidget(self.run_screen)   # index 0
-        self.stacked_widget.addWidget(self.alarm_screen) # index 1
-        self.stacked_widget.addWidget(self.maint_screen) # index 2
-        self.stacked_widget.addWidget(self.system_screen) # index 3
+        self.stacked_widget.addWidget(self.maint_screen) # index 1
+        self.stacked_widget.addWidget(self.system_screen) # index 2
 
 
         # Show the first screen
@@ -101,6 +98,7 @@ class MainWindow(QMainWindow):
         self.run_screen.flow_setpoint_changed.connect(lambda sp: self.ads.write("PLC_nSteamFlowStpt", sp))
         self.run_screen.ses_toggled.connect(lambda on: self.ads.write("PLC_bSesOn" if on else "PLC_bSesOff", True))
         self.run_screen.delivery_toggled.connect(lambda on: self.ads.write("PLC_bDeliveryOn" if on else "PLC_bDeliveryOff", True))
+        self.run_screen.reset_clicked.connect(lambda: self.ads.write("PLC_bFaultReset", True))
 
         # navigation bar events
         self.ads.connection_changed.connect(self._on_connection_changed)
@@ -109,6 +107,9 @@ class MainWindow(QMainWindow):
 
         # maint screen events
         self.ads.data_updated.connect(self.maint_screen.update_values)
+
+        # system screen events
+        self.system_screen.time_set_requested.connect(self._write_plc_time)
 
         self.ads.error_occurred.connect(lambda msg: print(msg))
         self.ads.start()
@@ -121,3 +122,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.ads.shutdown()   # stops the thread cleanly on window close
         super().closeEvent(event)
+
+    def _write_plc_time(self, dt_value):
+        self.ads.write("PLC_dtSetTime", dt_value)   # value first, then the flag (writes run in order)
+        self.ads.write("PLC_bSetTime", True)

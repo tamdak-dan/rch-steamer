@@ -60,9 +60,10 @@ class RunScreen(QWidget):
     flow_setpoint_changed = Signal(float)   # SLM, emitted when the operator commits a value
     ses_toggled = Signal(bool)   # True = SES On requested, False = SES Off requested
     delivery_toggled = Signal(bool)   # True = Delivery On requested, False = Delivery Off requested
+    reset_clicked = Signal()   # emitted when the reset button is clicked
     DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the System button can be used
     SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
-                           "SetDiffPressure", "InitMain", "SteamFlowing"}   # states where the SES button can be used
+                           "SetDiffPressure", "InitMain"}   # states where the SES button can be used
 
     def __init__(self):
         super().__init__()
@@ -71,7 +72,7 @@ class RunScreen(QWidget):
     def _setup_ui(self):
         # 1. Open the .ui file safely
         #ui_file_path = "ui/resources/RunPage_widget.ui"                ui_file_path = "ui/resources/RunPage_widget.ui"
-        ui_file_path = "ui/resources/RunPage_test4.ui"
+        ui_file_path = "ui/resources/RunPage_widget.ui"
         ui_file = QFile(ui_file_path)
 
         # 2. Instantiate the loader and load the layout
@@ -85,11 +86,7 @@ class RunScreen(QWidget):
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.addWidget(self.ui)
 
-        # change text on button presses
-        self.ui.PLC_bCmdSes.toggled.connect(
-            lambda checked: self.ui.PLC_bCmdSes.setText("System Enabled" if checked else "System Disabled"))
-        self.ui.PLC_bCmdDelivery.toggled.connect(
-            lambda checked: self.ui.PLC_bCmdDelivery.setText("Delivery Enabled" if checked else "Delivery Disabled"))
+
 
         # capture value after release of slider
         self.ui.horizontalSlider.setTracking(False)
@@ -112,16 +109,15 @@ class RunScreen(QWidget):
         t.setItemDelegateForColumn(0, AlarmTagDelegate(t))   
         self._last_faults = None
 
-        # set up button signals
-        self.ui.PLC_bCmdSes.toggled.connect(self.ses_toggled.emit)
-        self.ui.PLC_bCmdDelivery.toggled.connect(self.delivery_toggled.emit)
+        # buttons request a change; what they show comes from the PLC in update_values
+        self._ses_on = False
+        self._delivery_on = False
+        self.ui.PLC_bCmdSes.clicked.connect(self._on_ses_clicked)
+        self.ui.PLC_bCmdDelivery.clicked.connect(self._on_delivery_clicked)
 
-        # EXAMPLE BUTTON self.ui.HMI_bRun.toggled.connect(self.HMI_bRun.emit)
-        
+        # set up reset signal
+        self.ui.PLC_bCmdReset.clicked.connect(self.reset_clicked.emit)
 
-    #@Slot(dict)
-    #def update_values(self, values: dict):
-    #    self.ui.HMI_nPT1.setText(f"{values['nPT1'] / 10:.1f}")
     @Slot(dict)
     def update_values(self, values: dict):
         self.ui.PLC_nSteamFlowMeasured.setText(str(values['PLC_nSteamFlowMeasured']))
@@ -139,7 +135,11 @@ class RunScreen(QWidget):
         self.ui.PLC_bCmdSes.setEnabled(state in self.SES_UNLOCKED_STATES)
         self.ui.PLC_bCmdDelivery.setEnabled(state in self.DELIVERY_UNLOCKED_STATES)
 
-
+        # buttons follow the PLC: a fault or reset turns them off on its own
+        self._ses_on = state in self.SES_ON_STATES
+        self._delivery_on = state == "SteamFlowing" and bool(values.get("PLC_bSV3", False))
+        self._show_toggle(self.ui.PLC_bCmdSes, self._ses_on, "System Enabled", "System Disabled")
+        self._show_toggle(self.ui.PLC_bCmdDelivery, self._delivery_on, "Delivery Enabled", "Delivery Disabled")
 
 
     @Slot(int)
