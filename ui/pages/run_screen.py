@@ -136,8 +136,8 @@ class RunScreen(QWidget):
         self.ui.PLC_bCmdDelivery.setEnabled(state in self.DELIVERY_UNLOCKED_STATES)
 
         # buttons follow the PLC: a fault or reset turns them off on its own
-        self._ses_on = state in self.SES_ON_STATES
-        self._delivery_on = state == "SteamFlowing" and bool(values.get("PLC_bSV3", False))
+        self._ses_on = state in self.SES_UNLOCKED_STATES
+        self._delivery_on = state == "SteamFlowing"
         self._show_toggle(self.ui.PLC_bCmdSes, self._ses_on, "System Enabled", "System Disabled")
         self._show_toggle(self.ui.PLC_bCmdDelivery, self._delivery_on, "Delivery Enabled", "Delivery Disabled")
 
@@ -146,3 +146,16 @@ class RunScreen(QWidget):
     def _on_flow_slider_committed(self, value: int):
         sp = value / 4.0                      # 0–100 ticks -> 0–25 SLM
         self.flow_setpoint_changed.emit(sp)
+
+    def _on_ses_clicked(self):
+        self.ui.PLC_bCmdSes.setChecked(self._ses_on)        # undo the tap's own flip; PLC decides
+        self.ses_toggled.emit(not self._ses_on)
+
+    def _on_delivery_clicked(self):
+        self.ui.PLC_bCmdDelivery.setChecked(self._delivery_on)
+        self.delivery_toggled.emit(not self._delivery_on)
+
+    @staticmethod
+    def _show_toggle(btn, on: bool, on_text: str, off_text: str):
+        btn.setChecked(on)
+        btn.setText(on_text if on else off_text)
