@@ -111,7 +111,11 @@ class MainWindow(QMainWindow):
         self.maint_screen.output_requested.connect(self.ads.write)
 
         # system screen events
+        self.ads.data_updated.connect(self.system_screen.update_values)
+        self.ads.connection_changed.connect(self.system_screen.set_connected)
         self.system_screen.time_set_requested.connect(self._write_plc_time)
+        self.system_screen.model_change_requested.connect(lambda slm: self.ads.write("PLC_nRatedFlow", slm))
+        self.system_screen.eip_apply_requested.connect(self._write_eip)
 
         self.ads.error_occurred.connect(lambda msg: print(msg))
         self.ads.start()
@@ -128,3 +132,10 @@ class MainWindow(QMainWindow):
     def _write_plc_time(self, dt_value):
         self.ads.write("PLC_dtSetTime", dt_value)   # value first, then the flag (writes run in order)
         self.ads.write("PLC_bSetTime", True)
+
+    def _write_eip(self, ip, mask, gw):
+        # writes run in order on the ADS thread, so the values land before the apply flag
+        self.ads.write("PLC_nEipIpSet", ip)
+        self.ads.write("PLC_nEipMaskSet", mask)
+        self.ads.write("PLC_nEipGwSet", gw)
+        self.ads.write("PLC_bEipApply", True)

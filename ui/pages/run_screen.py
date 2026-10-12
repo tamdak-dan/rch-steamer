@@ -7,13 +7,16 @@ from datetime import datetime
 
 # Function to format fault timestamps
 def format_fault_time(ts: str) -> str:
-    """'2026-10-06-13:12:55.762' -> '2026-10-06 13:12:55'"""
+    """'DT#2026-10-12-14:39:00' or '2026-10-06-13:12:55.762' -> '2026-10-12 14:39:00'"""
     if not ts:
-        return ""                      # empty fault slot
-    try:
-        return datetime.strptime(ts, "%Y-%m-%d-%H:%M:%S.%f").strftime("%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        return ts                      # unexpected format: show it as-is rather than crash
+        return ""                                   # empty fault slot
+    ts = ts.removeprefix("DT#")
+    for fmt in ("%Y-%m-%d-%H:%M:%S", "%Y-%m-%d-%H:%M:%S.%f"):
+        try:
+            return datetime.strptime(ts, fmt).strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            pass
+    return ts                                       # unexpected format: show it as-is rather than crash
 
 # Delegate for painting alarm tags in the fault table
 class AlarmTagDelegate(QStyledItemDelegate):
