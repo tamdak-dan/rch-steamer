@@ -23,6 +23,8 @@ TAG_MAP = {
     "PLC_bDeliveryOff": ("GVL_HMI.stHmiCommand.bSteamDeliveryOff", pyads.PLCTYPE_BOOL),  # delivery OFF command indicator
 
     #maint screen
+    "PLC_bEnterMaint": ("GVL_HMI.stHmiCommand.bEnterMaint", pyads.PLCTYPE_BOOL),
+    "PLC_bExitMaint": ("GVL_HMI.stHmiCommand.bExitMaint", pyads.PLCTYPE_BOOL),
     "PLC_bMaintSV1": ("GVL_HMI.stHmiCommand.aValveCmd[1]", pyads.PLCTYPE_BOOL),
     "PLC_bMaintSV2": ("GVL_HMI.stHmiCommand.aValveCmd[2]", pyads.PLCTYPE_BOOL),
     "PLC_bMaintSV3": ("GVL_HMI.stHmiCommand.aValveCmd[3]", pyads.PLCTYPE_BOOL),

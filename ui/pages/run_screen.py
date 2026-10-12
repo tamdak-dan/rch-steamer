@@ -21,6 +21,8 @@ class AlarmTagDelegate(QStyledItemDelegate):
     TAG_INSET = 4      # gap from table edge and from top/bottom of the row
     TEXT_GAP = 10      # gap between bar and text
     TAG_COLOR = QColor("#c62828")
+    PLACEHOLDER_COLOR = QColor("#777777")
+    PLACEHOLDER = "placeholder"     # Qt.UserRole marker for the "No active faults" row
 
     def paint(self, painter, option, index):
         opt = QStyleOptionViewItem(option)
@@ -33,6 +35,15 @@ class AlarmTagDelegate(QStyledItemDelegate):
         style.drawControl(QStyle.CE_ItemViewItem, opt, painter, opt.widget)
 
         if not text:
+            return
+
+        # "No active faults": centered grey text, no tag
+        if index.data(Qt.UserRole) == self.PLACEHOLDER:
+            painter.save()
+            painter.setPen(self.PLACEHOLDER_COLOR)
+            painter.setFont(opt.font)
+            painter.drawText(option.rect, Qt.AlignCenter, text)
+            painter.restore()
             return
 
         r = option.rect
@@ -64,6 +75,7 @@ class RunScreen(QWidget):
     DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the System button can be used
     SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
                            "SetDiffPressure", "InitMain"}   # states where the SES button can be used
+    SES_ON_STATES = SES_UNLOCKED_STATES - {"SesOff"}   # same list minus SesOff: "is the system on?"
 
     def __init__(self):
         super().__init__()
@@ -125,18 +137,28 @@ class RunScreen(QWidget):
         faults = tuple((values[f"PLC_sFault{i}"], values[f"PLC_sFaultTime{i}"]) for i in range(1, 6))
         if faults != self._last_faults:          # only redraw when the list actually changes
             self._last_faults = faults
-            for row, (name, ts) in enumerate(faults):
-                self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(name))
+            t = self.ui.tableWidget
+            t.clearContents()
+            t.clearSpans()
+            active = [(name, ts) for name, ts in faults if name]
+            if not active:
+                # one row spanning both columns, drawn grey and untagged by AlarmTagDelegate
+                item = QTableWidgetItem("No active faults")
+                item.setData(Qt.UserRole, AlarmTagDelegate.PLACEHOLDER)
+                t.setSpan(0, 0, 1, 2)
+                t.setItem(0, 0, item)
+            for row, (name, ts) in enumerate(active):
+                t.setItem(row, 0, QTableWidgetItem(name))
                 time_item = QTableWidgetItem(format_fault_time(ts))
                 time_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   # right justify
-                self.ui.tableWidget.setItem(row, 1, time_item)
+                t.setItem(row, 1, time_item)
 
         state = values["PLC_sMachineState"]
         self.ui.PLC_bCmdSes.setEnabled(state in self.SES_UNLOCKED_STATES)
         self.ui.PLC_bCmdDelivery.setEnabled(state in self.DELIVERY_UNLOCKED_STATES)
 
         # buttons follow the PLC: a fault or reset turns them off on its own
-        self._ses_on = state in self.SES_UNLOCKED_STATES
+        self._ses_on = state in self.SES_ON_STATES
         self._delivery_on = state == "SteamFlowing"
         self._show_toggle(self.ui.PLC_bCmdSes, self._ses_on, "System Enabled", "System Disabled")
         self._show_toggle(self.ui.PLC_bCmdDelivery, self._delivery_on, "Delivery Enabled", "Delivery Disabled")

@@ -107,6 +107,8 @@ class MainWindow(QMainWindow):
 
         # maint screen events
         self.ads.data_updated.connect(self.maint_screen.update_values)
+        self.maint_screen.maint_toggled.connect(lambda on: self.ads.write("PLC_bEnterMaint" if on else "PLC_bExitMaint", True))
+        self.maint_screen.output_requested.connect(self.ads.write)
 
         # system screen events
         self.system_screen.time_set_requested.connect(self._write_plc_time)
