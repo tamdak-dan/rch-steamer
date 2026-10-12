@@ -160,12 +160,6 @@ QTableWidget#tableWidget {
     padding: 0px 8px;
 }
 
-/* The header row is a separate widget and doesn't inherit the table's font */
-QTableWidget#tableWidget QHeaderView::section {
-    font-size: __B2-font-size__;
-    font-weight: bold;
-}
-
 /* ---------- ALARM SCREEN STYLES ----------  */
 
 
@@ -214,9 +208,9 @@ QPushButton[maint="true"]:checked:disabled {
 }
 
 QTableWidget#tbl_MaintReadings {
-    font-size: 16px;
-    border: __widget_border__;
-    border-radius: __widget_border_radius__;
+    font-size: __B2-font-size__;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 0px 8px;
 }
 
 QTableWidget#tbl_MaintReadings::item {

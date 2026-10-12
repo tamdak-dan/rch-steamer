@@ -32,9 +32,9 @@ class MaintScreen(QWidget):
     READINGS = (
         ("PT-1 upstream",   "PLC_rPT1"),
         ("PT-2 downstream", "PLC_rPT2"),
-        ("PT check",        None),          # calculated from PT-1 and PT-2
-        ("LS-1 upper level", "PLC_bLS1"),
-        ("LS-3 lower level", "PLC_bLS3"),
+        ("Flow Rate",        "PLC_nSteamFlowMeasured"),          # calculated from PT-1 and PT-2
+        ("LS-1 low water", "PLC_bLS1"),
+        ("LS-3 empty water", "PLC_bLS3"),
         ("TC-1 SPA",        "PLC_rTC1"),
         ("TC-2 flow meter", "PLC_rTC2"),
         ("TC-3 ext line",   "PLC_rTC3"),

@@ -3,6 +3,17 @@ from PySide6.QtCore import Qt, Signal, QFile, Slot
 from PySide6.QtUiTools import QUiLoader 
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtCore import QRectF, Qt
+from datetime import datetime
+
+# Function to format fault timestamps
+def format_fault_time(ts: str) -> str:
+    """'2026-10-06-13:12:55.762' -> '2026-10-06 13:12:55'"""
+    if not ts:
+        return ""                      # empty fault slot
+    try:
+        return datetime.strptime(ts, "%Y-%m-%d-%H:%M:%S.%f").strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return ts                      # unexpected format: show it as-is rather than crash
 
 # Delegate for painting alarm tags in the fault table
 class AlarmTagDelegate(QStyledItemDelegate):
@@ -114,23 +125,21 @@ class RunScreen(QWidget):
     @Slot(dict)
     def update_values(self, values: dict):
         self.ui.PLC_nSteamFlowMeasured.setText(str(values['PLC_nSteamFlowMeasured']))
+
         faults = tuple((values[f"PLC_sFault{i}"], values[f"PLC_sFaultTime{i}"]) for i in range(1, 6))
         if faults != self._last_faults:          # only redraw when the list actually changes
             self._last_faults = faults
             for row, (name, ts) in enumerate(faults):
                 self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(name))
-                self.ui.tableWidget.setItem(row, 1, QTableWidgetItem(ts))
+                time_item = QTableWidgetItem(format_fault_time(ts))
+                time_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   # right justify
+                self.ui.tableWidget.setItem(row, 1, time_item)
 
         state = values["PLC_sMachineState"]
         self.ui.PLC_bCmdSes.setEnabled(state in self.SES_UNLOCKED_STATES)
         self.ui.PLC_bCmdDelivery.setEnabled(state in self.DELIVERY_UNLOCKED_STATES)
 
-        # right justify the fault times
-        for row, (name, ts) in enumerate(faults):
-            self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(name))
-            time_item = QTableWidgetItem(ts)
-            time_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            self.ui.tableWidget.setItem(row, 1, time_item)
+
 
 
     @Slot(int)

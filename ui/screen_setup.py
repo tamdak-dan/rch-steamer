@@ -96,18 +96,19 @@ class MainWindow(QMainWindow):
             poll_ms=250,
         )
 
+        # run screen events
         self.ads.data_updated.connect(self.run_screen.update_values)
         self.run_screen.flow_setpoint_changed.connect(lambda sp: self.ads.write("PLC_nSteamFlowStpt", sp))
         self.run_screen.ses_toggled.connect(lambda on: self.ads.write("PLC_bSesOn" if on else "PLC_bSesOff", True))
         self.run_screen.delivery_toggled.connect(lambda on: self.ads.write("PLC_bDeliveryOn" if on else "PLC_bDeliveryOff", True))
 
-        # setup PLC tags
-        # EXAMPLE BUTTON self.run_screen.HMI_bRun.connect(lambda checked: self.ads.write("HMI_bRun", checked))
-
-
+        # navigation bar events
         self.ads.connection_changed.connect(self._on_connection_changed)
         self.ads.data_updated.connect(self.navigation_bar.update_values)
         self.ads.connection_changed.connect(self.navigation_bar.set_connected)
+
+        # maint screen events
+        self.ads.data_updated.connect(self.maint_screen.update_values)
 
         self.ads.error_occurred.connect(lambda msg: print(msg))
         self.ads.start()
