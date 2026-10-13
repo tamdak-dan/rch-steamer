@@ -1,5 +1,6 @@
 import hashlib
 import ipaddress
+import time
 from datetime import datetime, timedelta
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from PySide6.QtCore import Signal, QFile, Slot
@@ -13,19 +14,26 @@ class SystemScreen(QWidget):
     # object, not int: Qt's int is signed 32-bit and 192.x.x.x as a UDINT is ~3.2 billion
     eip_apply_requested = Signal(object, object, object)   # (ip, subnet mask, gateway)
     time_set_requested = Signal(object)               # new PLC clock as a DT value (seconds since 1970-01-01, local time)
-    model_change_requested = Signal(int)              # rated flow in SLM: 25 or 50
+    model_change_requested = Signal(int)              # selected size: 25 or 50 (screen_setup writes bSetSize25L/50L)
 
     # Match these to GVL_HMI.stHmiStatus.sStateName
-    MODEL_CHANGE_STATES = {"SesOff"}       # rated flow can only change while the steamer is off
+    MODEL_CHANGE_STATES = {"SesOff"}       # the size can only change while the steamer is off
     EIP_CHANGE_STATES = {"SesOff"}         # the terminal drops its EtherNet/IP connection while it restarts
+    TIME_CHANGE_STATES = {"SesOff"}        # keep fault timestamps consistent: no clock changes mid-run or in a fault
 
     # GVL_HMI.stHmiStatus.stEip.nApplyState
     EIP_IDLE, EIP_BUSY, EIP_DONE, EIP_ERROR = 0, 1, 2, 3
     # GVL_HMI.stHmiStatus.nSetTimeState uses the same values
 
+    # a time set counts as confirmed once the PLC clock reads the requested time (plus elapsed) within this
+    TIME_CONFIRM_TOLERANCE_S = 5
+    TIME_CONFIRM_TIMEOUT_S = 10            # give up waiting after this and say so
+
     DT_EPOCH = datetime(1970, 1, 1)        # TwinCAT DT = seconds since this, in the PLC's local time
 
     MODELS = (25, 50)
+    # each size is a retained BOOL in the PLC; exactly one should be TRUE
+    MODEL_TAGS = {25: "PLC_bSetSize25L", 50: "PLC_bSetSize50L"}
 
     # SHA-256 of the model-change PIN (default 2550). To change it:
     #   python -c "import hashlib; print(hashlib.sha256(b'NEWPIN').hexdigest())"
@@ -69,13 +77,15 @@ class SystemScreen(QWidget):
 
         self._state = ""
         self._connected = False
-        self._rated_flow = None
+        self._size = None              # 25 or 50 from the PLC; None = not reported or not exactly one bit set
+        self._size_bits = None         # (b25, b50) as read, for the status message
         self._eip_active = None        # (ip, mask, gw) strings the terminal is actually using
         self._eip_edited = False       # True once the operator changes a field; stops live values overwriting it
         self._eip_apply_state = self.EIP_IDLE
         self._plc_now = None           # PLC clock (datetime); the PLC is the only clock this HMI shows
         self._time_edited = False      # True once the operator changes date/time; stops the PLC clock refilling them
         self._time_state = self.EIP_IDLE
+        self._time_pending = None      # (requested datetime, time.monotonic() when sent) while waiting for confirmation
         self._apply_locks()
 
     # ---- values from the PLC ------------------------------------------------
@@ -84,10 +94,14 @@ class SystemScreen(QWidget):
         self._state = values["PLC_sMachineState"]
 
         # .get so a missing tag can't stop the rest of the page from updating
-        rated = values.get("PLC_nRatedFlow")
-        self._rated_flow = int(round(rated)) if rated is not None else None
+        bits = tuple(values.get(self.MODEL_TAGS[slm]) for slm in self.MODELS)
+        self._size_bits = None if None in bits else tuple(bool(b) for b in bits)
+        if self._size_bits and sum(self._size_bits) == 1:
+            self._size = self.MODELS[self._size_bits.index(True)]
+        else:
+            self._size = None                  # missing tags, neither bit, or both bits set
         for slm, btn in self._model_buttons.items():
-            btn.setChecked(self._rated_flow == slm)
+            btn.setChecked(self._size == slm)
 
         # active EtherNet/IP settings (read by the PLC from CoE 0xF900)
         raw = (values.get("PLC_nEipIpActive"), values.get("PLC_nEipMaskActive"), values.get("PLC_nEipGwActive"))
@@ -107,6 +121,7 @@ class SystemScreen(QWidget):
             self.ui.lbl_CurrentTime.setText(self._plc_now.strftime("%Y-%m-%d %H:%M:%S"))
             if not self._time_edited:
                 self._prefill_time()
+            self._check_time_pending()
         self._apply_locks()
 
     @Slot(bool)
@@ -116,14 +131,20 @@ class SystemScreen(QWidget):
 
     def _apply_locks(self):
         # time lives in the PLC, so it can only be shown or set while connected
-        time_ok = self._connected and self._plc_now is not None and self._time_state != self.EIP_BUSY
+        time_state_ok = self._state in self.TIME_CHANGE_STATES
+        time_ok = (self._connected and self._plc_now is not None and time_state_ok
+                   and self._time_state != self.EIP_BUSY)
         for btn in (self.ui.btn_Date, self.ui.btn_Time, self.ui.btn_SetTime):
             btn.setEnabled(time_ok)
+        lock_msgs = ("PLC disconnected.", "Turn the system off (SES Off) to set the clock.")
         if not self._connected:
             self.ui.lbl_CurrentTime.setText("--")
             if self._time_state == self.EIP_IDLE:
-                self._set_status(self.ui.lbl_TimeStatus, "PLC disconnected.")
-        elif self.ui.lbl_TimeStatus.text() == "PLC disconnected.":
+                self._set_status(self.ui.lbl_TimeStatus, lock_msgs[0])
+        elif not time_state_ok:
+            if self._time_state == self.EIP_IDLE and self._time_pending is None:
+                self._set_status(self.ui.lbl_TimeStatus, lock_msgs[1])
+        elif self.ui.lbl_TimeStatus.text() in lock_msgs:
             self._set_status(self.ui.lbl_TimeStatus, "24-hour clock.")
 
         model_ok = self._connected and self._state in self.MODEL_CHANGE_STATES
@@ -131,6 +152,14 @@ class SystemScreen(QWidget):
             btn.setEnabled(model_ok)
         if not self._connected:
             self._set_status(self.ui.lbl_ModelStatus, "PLC disconnected.")
+        elif self._size is None:
+            if self._size_bits is None:
+                msg = "PLC hasn't reported a size."
+            elif all(self._size_bits):
+                msg = "PLC has both 25 and 50 set. Select one."
+            else:
+                msg = "No size set in the PLC. Select 25 or 50."
+            self._set_status(self.ui.lbl_ModelStatus, msg, False)
         elif model_ok:
             self._set_status(self.ui.lbl_ModelStatus, "PIN required to change the model.")
         else:
@@ -169,12 +198,29 @@ class SystemScreen(QWidget):
         if state == self.EIP_BUSY:
             self._set_status(self.ui.lbl_TimeStatus, "Setting PLC clock...")
         elif state == self.EIP_DONE:
+            self._time_pending = None
             self._time_edited = False         # fields follow the PLC clock again
             self._set_status(self.ui.lbl_TimeStatus, "PLC clock set.", True)
         elif state == self.EIP_ERROR:
+            self._time_pending = None
             self._set_status(self.ui.lbl_TimeStatus, "PLC couldn't set its clock.", False)
         else:
             self._set_status(self.ui.lbl_TimeStatus, "24-hour clock.")
+
+    def _check_time_pending(self):
+        # confirm from the clock itself, so a fast or missing nSetTimeState can't leave "Sending..." on screen
+        if self._time_pending is None:
+            return
+        requested, sent_at = self._time_pending
+        elapsed = time.monotonic() - sent_at
+        expected = requested + timedelta(seconds=elapsed)
+        if abs((self._plc_now - expected).total_seconds()) <= self.TIME_CONFIRM_TOLERANCE_S:
+            self._time_pending = None
+            self._time_edited = False
+            self._set_status(self.ui.lbl_TimeStatus, "PLC clock set.", True)
+        elif elapsed > self.TIME_CONFIRM_TIMEOUT_S:
+            self._time_pending = None
+            self._set_status(self.ui.lbl_TimeStatus, "No change on the PLC clock. Try again.", False)
 
     # ---- editing ----------------------------------------------------------
     def _edit_field(self, btn, title: str, mode: str):
@@ -238,13 +284,14 @@ class SystemScreen(QWidget):
                                 f"Set the PLC clock to {text}? Fault timestamps use this clock.", "Set time"):
             return
         self._set_status(self.ui.lbl_TimeStatus, "Sending to PLC...")
+        self._time_pending = (dt, time.monotonic())
         self.time_set_requested.emit(int((dt - self.DT_EPOCH).total_seconds()))
 
     def _on_model_clicked(self, slm: int):
         # put the buttons back to the PLC's value until feedback confirms a change
         for s, btn in self._model_buttons.items():
-            btn.setChecked(self._rated_flow == s)
-        if slm == self._rated_flow:
+            btn.setChecked(self._size == s)
+        if slm == self._size:
             return
 
         pin = TouchKeypad.get_value(self, "Enter PIN to change model", "pin")

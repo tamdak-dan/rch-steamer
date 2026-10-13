@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
         self.ads.data_updated.connect(self.system_screen.update_values)
         self.ads.connection_changed.connect(self.system_screen.set_connected)
         self.system_screen.time_set_requested.connect(self._write_plc_time)
-        self.system_screen.model_change_requested.connect(lambda slm: self.ads.write("PLC_nRatedFlow", slm))
+        self.system_screen.model_change_requested.connect(self._write_size)
         self.system_screen.eip_apply_requested.connect(self._write_eip)
 
         self.ads.error_occurred.connect(lambda msg: print(msg))
@@ -128,6 +128,11 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.ads.shutdown()   # stops the thread cleanly on window close
         super().closeEvent(event)
+
+    def _write_size(self, slm):
+        # clear the other size first so the PLC never sees both TRUE (writes run in order)
+        self.ads.write("PLC_bSetSize50L" if slm == 25 else "PLC_bSetSize25L", False)
+        self.ads.write("PLC_bSetSize25L" if slm == 25 else "PLC_bSetSize50L", True)
 
     def _write_plc_time(self, dt_value):
         self.ads.write("PLC_dtSetTime", dt_value)   # value first, then the flag (writes run in order)
