@@ -8,6 +8,10 @@ class NavigationWidget(QWidget):
     STATE_CAT = {"SteamFlowing": "run", "Fault": "fault",
                  "FillWater": "startup", "PurgeVessel": "startup",
                  "SetDiffPressure": "startup", "InitMain": "startup", "CheckIfHot": "startup"}
+
+    # retained size bits in the PLC; exactly one should be TRUE
+    SIZE_TAGS = {25: "PLC_bSetSize25L", 50: "PLC_bSetSize50L"}
+    MODEL_PREFIX = "102B"          # shown as 102B-25 / 102B-50 under the title
     
 
     def __init__(self):
@@ -58,6 +62,8 @@ class NavigationWidget(QWidget):
         state = values["PLC_sMachineState"]
         self.ui.PLC_sMachineState.setText(state)
 
+        self._show_model(values)
+
         cat = self.STATE_CAT.get(state, "idle")
         lbl = self.ui.PLC_sMachineState
         if lbl.property("cat") != cat:
@@ -65,10 +71,32 @@ class NavigationWidget(QWidget):
             lbl.style().unpolish(lbl)
             lbl.style().polish(lbl)
 
+    def _show_model(self, values: dict):
+        # .get so missing size tags can't stop the state pill from updating
+        bits = {slm: values.get(tag) for slm, tag in self.SIZE_TAGS.items()}
+        on = [slm for slm, b in bits.items() if b]
+        if None in bits.values():
+            text, warn = "--", False                     # tags not in TAG_MAP yet
+        elif len(on) == 1:
+            text, warn = f"{self.MODEL_PREFIX}-{on[0]}", False
+        else:
+            text, warn = "Model not set", True           # neither or both set: see System page
+        self._set_model_tag(text, warn)
+
+    def _set_model_tag(self, text: str, warn: bool):
+        lbl = self.ui.lbl_SteamerModel
+        lbl.setVisible(text != "--")                     # hide when the size is unknown (no tags / disconnected)
+        lbl.setText(text)
+        if lbl.property("warn") != warn:
+            lbl.setProperty("warn", warn)
+            lbl.style().unpolish(lbl)
+            lbl.style().polish(lbl)
+
     @Slot(bool)
     def set_connected(self, connected: bool):
         if not connected:
             self.ui.PLC_sMachineState.setText("PLC Disconnected")
+            self._set_model_tag("--", False)             # don't show a size we can no longer confirm
 
     @Slot(int)
     def set_active_page(self, index: int):

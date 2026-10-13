@@ -60,6 +60,15 @@ QLabel#ProjectTitle {
     color: #ffffff;
 }
 
+/* steamer model under the title: small and grey so it reads as a fixed label, not a live value */
+QLabel#lbl_SteamerModel {
+    font-size: 13px;
+    color: #c8c8c8;
+}
+QLabel#lbl_SteamerModel[warn="true"] {
+    color: #ffd27a;
+}
+
 /* ---------- RUN SCREEN STYLES ----------  */
 QWidget#RunPage {
     font-family: __proj_font__;
