@@ -46,7 +46,8 @@ TAG_MAP = {
     "PLC_dtSetTime":     ("GVL_HMI.stHmiCommand.dtSetTime", pyads.PLCTYPE_DT),
     "PLC_bSetTime":      ("GVL_HMI.stHmiCommand.bSetTime", pyads.PLCTYPE_BOOL),
     "PLC_nSetTimeState": ("GVL_HMI.stHmiStatus.nSetTimeState", pyads.PLCTYPE_INT),   # 0 idle, 1 busy, 2 done, 3 error
-
+    "PLC_bSetSize25L":   ("GVL_HMI.stHmiCommand.bSetSize25L", pyads.PLCTYPE_BOOL),
+    "PLC_bSetSize50L":   ("GVL_HMI.stHmiCommand.bSetSize50L", pyads.PLCTYPE_BOOL),
 
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),
