@@ -243,21 +243,23 @@ class SystemScreen(QWidget):
         except ValueError:
             self._set_status(self.ui.lbl_NetworkStatus, "Check all three addresses.", False)
             return
-        # 0.0.0.0 in any field switches the terminal to DHCP, so all three must be real addresses
-        if int(addr) == 0 or net.prefixlen == 0 or int(gw_addr) == 0:
-            self._set_status(self.ui.lbl_NetworkStatus, "0.0.0.0 isn't allowed (it turns on DHCP).", False)
+        # an IP of 0.0.0.0 switches the terminal to DHCP, and a 0.0.0.0 mask is never valid
+        if int(addr) == 0 or net.prefixlen == 0:
+            self._set_status(self.ui.lbl_NetworkStatus, "IP and mask can't be 0.0.0.0 (IP 0.0.0.0 turns on DHCP).", False)
             return
         if addr in (net.network_address, net.broadcast_address):
             self._set_status(self.ui.lbl_NetworkStatus, "That IP is the network or broadcast address.", False)
             return
-        if gw_addr not in net:
-            self._set_status(self.ui.lbl_NetworkStatus, "Gateway must be in the same subnet.", False)
+        # gateway 0.0.0.0 = no gateway (tool on the same subnet); otherwise it must be inside the subnet
+        if int(gw_addr) != 0 and gw_addr not in net:
+            self._set_status(self.ui.lbl_NetworkStatus, "Gateway must be in the same subnet, or 0.0.0.0 for none.", False)
             return
         if self._eip_active == (ip, str(net.netmask), gw):
             self._set_status(self.ui.lbl_NetworkStatus, "Those are already the active settings.")
             return
 
-        message = (f"Set the EL6652-0010 EtherNet/IP adapter to {ip} / {net.netmask}, gateway {gw}.\n\n"
+        gw_text = "no gateway" if int(gw_addr) == 0 else f"gateway {gw}"
+        message = (f"Set the EL6652-0010 EtherNet/IP adapter to {ip} / {net.netmask}, {gw_text}.\n\n"
                    "The terminal restarts and the tool's EtherNet/IP connection drops briefly. "
                    "The tool must use the new address afterward.")
         if not TouchConfirm.ask(self, "Apply EtherNet/IP settings", message, "Apply"):
