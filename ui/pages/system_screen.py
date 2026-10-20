@@ -21,7 +21,7 @@ class SystemScreen(QWidget):
     EIP_CHANGE_STATES = {"SesOff"}         # the terminal drops its EtherNet/IP connection while it restarts
     TIME_CHANGE_STATES = {"SesOff"}        # keep fault timestamps consistent: no clock changes mid-run or in a fault
 
-    # GVL_HMI.stHmiStatus.stEip.nApplyState
+    # GVL_HMI.stHmiStatus.nEipState
     EIP_IDLE, EIP_BUSY, EIP_DONE, EIP_ERROR = 0, 1, 2, 3
     # GVL_HMI.stHmiStatus.nSetTimeState uses the same values
 
@@ -111,7 +111,7 @@ class SystemScreen(QWidget):
                 for btn, text in zip(self._eip_fields, self._eip_active):
                     btn.setText(text)
 
-        self._show_eip_apply_state(values.get("PLC_nEipApplyState", self.EIP_IDLE))
+        self._show_eip_apply_state(values.get("PLC_nEipState", self.EIP_IDLE))
 
         # PLC clock: shown live, and used to pre-fill the date/time fields until the operator edits them
         self._show_time_state(values.get("PLC_nSetTimeState", self.EIP_IDLE))

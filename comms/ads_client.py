@@ -56,7 +56,7 @@ TAG_MAP = {
     "PLC_nEipIpActive":   ("GVL_HMI.stHmiStatus.nIpActive", pyads.PLCTYPE_UDINT),
     "PLC_nEipMaskActive": ("GVL_HMI.stHmiStatus.nMaskActive", pyads.PLCTYPE_UDINT),
     "PLC_nEipGwActive":   ("GVL_HMI.stHmiStatus.nGatewayActive", pyads.PLCTYPE_UDINT),
-    "PLC_nEipApplyState": ("GVL_HMI.stHmiStatus.nEipState", pyads.PLCTYPE_INT),
+    "PLC_nEipState":      ("GVL_HMI.stHmiStatus.nEipState", pyads.PLCTYPE_INT),
 
     #"pt2":         ("MAIN.PT2",         pyads.PLCTYPE_INT),   # downstream pressure
     #"flow_rate":   ("MAIN.FlowRate",    pyads.PLCTYPE_INT),
