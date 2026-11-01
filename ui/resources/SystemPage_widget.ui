@@ -332,79 +332,165 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="SystemPage_Model">
+    <layout class="QHBoxLayout" name="SystemPage_Bottom" stretch="1,1">
      <property name="spacing">
-      <number>6</number>
+      <number>20</number>
      </property>
      <item>
-      <widget class="QLabel" name="H2_Model">
-       <property name="text">
-        <string>Steamer model</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_model">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="SystemPage_ModelRow" stretch="0,0,1">
+      <layout class="QVBoxLayout" name="SystemPage_Model">
        <property name="spacing">
-        <number>10</number>
+        <number>6</number>
        </property>
        <item>
-        <widget class="QPushButton" name="btn_Model25">
-         <property name="minimumSize">
-          <size>
-           <width>130</width>
-           <height>50</height>
-          </size>
-         </property>
+        <widget class="QLabel" name="H2_Model">
          <property name="text">
-          <string>25 SLM</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="sys" stdset="0">
-          <bool>true</bool>
+          <string>Steamer model</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_Model50">
-         <property name="minimumSize">
-          <size>
-           <width>130</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>50 SLM</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="sys" stdset="0">
-          <bool>true</bool>
+        <widget class="Line" name="line_model">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="lbl_ModelStatus">
+        <layout class="QHBoxLayout" name="SystemPage_ModelRow" stretch="0,0,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="btn_Model25">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>25 SLM</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="sys" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_Model50">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>50 SLM</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="sys" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbl_ModelStatus">
+           <property name="text">
+            <string>PIN required. Model can only be changed in SES Off.</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+           <property name="hint" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="SystemPage_Control">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="H2_Control">
          <property name="text">
-          <string>PIN required. Model can only be changed in SES Off.</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-         <property name="hint" stdset="0">
-          <bool>true</bool>
+          <string>Control mode</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_control">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="SystemPage_ControlRow" stretch="0,0,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+           <item>
+            <widget class="QPushButton" name="btn_ControlLocal">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Local</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="sys" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_ControlRemote">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Remote</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="sys" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+         <item>
+          <widget class="QLabel" name="lbl_ControlStatus">
+           <property name="text">
+            <string>Remote locks the Run page controls.</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+           <property name="hint" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>

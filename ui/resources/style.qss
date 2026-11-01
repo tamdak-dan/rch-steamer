@@ -163,6 +163,32 @@ QPushButton#PLC_bCmdDelivery:checked:disabled {
     border: 2px dashed #555555;
 }
 
+/* shown only in Remote control mode; amber like the other "attention" hints */
+QLabel#lbl_RemoteBanner {
+    font-size: 15px;
+    font-weight: bold;
+    color: #1a1a1a;
+    background-color: #ffb74d;
+    border-radius: 9px;
+    padding: 1px 12px;
+}
+
+/* Locked (Remote control mode): same look as the other locked buttons */
+QPushButton#PLC_bCmdReset:disabled {
+    background-color: #2a2a2a;
+    color: #777777;
+    border: 2px dashed #555555;
+}
+
+/* Locked (Remote control mode): grey the fill and handle */
+QSlider#horizontalSlider::sub-page:horizontal:disabled {
+    background: #3c3c3c;
+}
+QSlider#horizontalSlider::handle:horizontal:disabled {
+    background: #2a2a2a;
+    border: 2px dashed #555555;
+}
+
 QTableWidget#tableWidget {
     font-size: __B2-font-size__;
     border-bottom: 1px solid #d0d0d0;

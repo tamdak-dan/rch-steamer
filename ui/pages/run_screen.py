@@ -157,8 +157,14 @@ class RunScreen(QWidget):
                 t.setItem(row, 1, time_item)
 
         state = values["PLC_sMachineState"]
-        self.ui.PLC_bCmdSes.setEnabled(state in self.SES_UNLOCKED_STATES)
-        self.ui.PLC_bCmdDelivery.setEnabled(state in self.DELIVERY_UNLOCKED_STATES)
+        # Remote (set on the System page): the EtherNet/IP tool owns these, so lock them here.
+        # A missing tag reads as Local so the page still works before the PLC has the variable.
+        local = not values.get("PLC_bRemoteMode", False)
+        self.ui.PLC_bCmdSes.setEnabled(local and state in self.SES_UNLOCKED_STATES)
+        self.ui.PLC_bCmdDelivery.setEnabled(local and state in self.DELIVERY_UNLOCKED_STATES)
+        self.ui.horizontalSlider.setEnabled(local)
+        self.ui.PLC_bCmdReset.setEnabled(local)
+        self.ui.lbl_RemoteBanner.setVisible(not local)
 
         # buttons follow the PLC: a fault or reset turns them off on its own
         self._ses_on = state in self.SES_ON_STATES
