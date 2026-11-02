@@ -50,7 +50,16 @@ Copy the resulting **`rch-wheels`** folder onto the USB stick, next to the ZIP. 
 
 ## Part 3 — Service tasks on a unit
 
-**Getting to a command line:** plug a USB keyboard into the Pi and press **Ctrl+Alt+F2**, then log in. **Ctrl+Alt+F1** returns to the HMI. (Or SSH from a laptop on the machine network, if SSH was turned on when the master card was built.)
+**Getting to a command line (maintenance stick):**
+
+1. On any USB stick, create an empty file named **`rch-maintenance`** in the top folder. (In Windows: right-click → *New* → *Text Document*, name it `rch-maintenance`. A `.txt` ending is fine.) Keep this stick around; it's reusable.
+2. Plug a USB keyboard and the stick into the Pi and power-cycle it. Instead of the HMI, you get a login prompt with a *MAINTENANCE MODE* banner.
+3. Log in with the Pi's username and password.
+4. When done: remove the stick and type `sudo reboot`. The HMI comes back.
+
+While the card is locked, anything you change is lost at the next restart (the banner says so). To make lasting changes, unlock it first and keep the stick plugged in through the reboot.
+
+Alternatives: **SSH** from a laptop on the machine network, if SSH was turned on when the master card was built. **Ctrl+Alt+F2** may work on some setups, but don't rely on it.
 
 | Task | Command |
 |---|---|

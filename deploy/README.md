@@ -27,11 +27,11 @@ The goal: one **master SD card image** that boots straight into the HMI, full sc
    ```
    Run `bash rch-steamer/deploy/install.sh --help` for all options.
 4. **Reboot:** `sudo reboot`. The HMI should fill the screen. If the picture is wrong, see *Screen troubleshooting* below.
-5. **Connect to the PLC.** Plug the Pi into the machine network. If the HMI shows "disconnected", the PLC needs a route for this Pi (once per PLC). Press **Ctrl+Alt+F2**, log in, run `rch-add-route`, and enter the PLC's login. Press **Ctrl+Alt+F1** to go back to the HMI.
+5. **Connect to the PLC.** Plug the Pi into the machine network. If the HMI shows "disconnected", the PLC needs a route for this Pi (once per PLC). Get to a login prompt with a **maintenance stick** (UPDATING.md, Part 3), log in, run `rch-add-route`, and enter the PLC's login. Remove the stick and run `sudo reboot` to go back to the HMI.
 
 ## Part B — Save the master image
 
-1. On the Pi: press Ctrl+Alt+F2, log in, run `sudo poweroff`. Wait for the green light to stop, then remove the card.
+1. On the Pi: boot with a maintenance stick (UPDATING.md, Part 3), log in, remove the stick, and run `sudo poweroff`. Wait for the green light to stop, then remove the card.
 2. Put the card in your PC and save it to a file:
    - **Windows:** install [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/). Type a file name like `rch-steamer-2026-11-01.img`, pick the SD card's drive letter, tick **Read Only Allocated Partitions**, click **Read**.
    - **Mac:** in Terminal, `diskutil list` to find the card (e.g. `/dev/disk4`), then `diskutil unmountDisk /dev/disk4` and `sudo dd if=/dev/rdisk4 of=rch-steamer-2026-11-01.img bs=4m`.
