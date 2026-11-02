@@ -6,6 +6,8 @@
 Description=RCH Steamer HMI (kiosk)
 After=systemd-user-sessions.service rch-usb-update.service
 Conflicts=getty@tty1.service
+# Skipped for one boot when a maintenance USB stick is plugged in.
+ConditionPathExists=!/run/rch-maintenance
 
 [Service]
 Type=simple
@@ -21,7 +23,8 @@ StandardError=journal
 UtmpIdentifier=tty1
 UtmpMode=user
 Environment=XDG_SESSION_TYPE=wayland
-# -s lets a technician switch to a text console with Ctrl+Alt+F2.
+# -s allows Ctrl+Alt+F2 console switching where it works; the dependable way
+# to a login prompt is the maintenance USB stick (see deploy/UPDATING.md).
 ExecStart=/usr/bin/cage -s -- /usr/local/bin/rch-kiosk-launch
 Restart=always
 RestartSec=3

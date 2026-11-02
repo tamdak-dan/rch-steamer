@@ -12,6 +12,11 @@
 #   3. Wait. The screen shows progress; the Pi may reboot twice.
 #   4. When the HMI appears, remove the stick.
 #
+# Maintenance mode: a stick with a file named "rch-maintenance" (or
+# "rch-maintenance.txt") in its top folder makes the Pi boot to a login
+# prompt instead of the HMI, for that boot only. Remove the stick and
+# reboot to get the HMI back.
+#
 # Other uses (from a keyboard or SSH):
 #   sudo rch-usb-update /path/to/rch-steamer-main.zip   install a ZIP now
 #   sudo rch-usb-update --rollback                      go back one version
@@ -31,6 +36,8 @@ WORK=/run/rch-update
 MNT=/run/rch-usb
 ZIP_PATTERN='rch-steamer-*.zip'     # hyphen: won't match rch-steamer_TwinCAT
 WHEELS_DIR_NAME=rch-wheels          # optional folder on the stick (new packages)
+MAINT_FLAG=/run/rch-maintenance     # tells the kiosk service not to start
+MAINT=no                            # set by find_usb_package
 
 LOCK_SD=yes
 # shellcheck disable=SC1090
@@ -83,8 +90,9 @@ relock_if_needed() {
 }
 
 # ---------------------------------------------------------------------------
-# Find an update ZIP on any USB stick. Copies it (and any rch-wheels folder)
-# into $WORK, which is in memory. Sets PKG_NAME. Returns 1 if none found.
+# Look at every USB stick. Sets MAINT=yes if one has an "rch-maintenance"
+# file. Copies an update ZIP (and any rch-wheels folder) into $WORK, which
+# is in memory, and sets PKG_NAME. Returns 1 if no ZIP was found.
 # ---------------------------------------------------------------------------
 find_usb_package() {
     local waited=0 devs dev found
@@ -102,6 +110,9 @@ find_usb_package() {
     mkdir -p "$MNT" "$WORK"
     for dev in $(for d in $devs; do readlink -f "$d"; done | sort -u); do
         mount -o ro "$dev" "$MNT" 2>/dev/null || continue
+        if [ -n "$(find "$MNT" -maxdepth 1 -type f \( -iname rch-maintenance -o -iname rch-maintenance.txt \) 2>/dev/null)" ]; then
+            MAINT=yes
+        fi
         found=$(find "$MNT" -maxdepth 1 -type f -iname "$ZIP_PATTERN" -printf '%T@ %p\n' 2>/dev/null \
                 | sort -nr | head -1 | cut -d' ' -f2-)
         if [ -n "$found" ]; then
@@ -115,6 +126,30 @@ find_usb_package() {
         umount "$MNT"
     done
     return 1
+}
+
+# ---------------------------------------------------------------------------
+# Maintenance mode: skip the HMI this boot and show a login prompt instead.
+# Everything here lives in /run (memory), so the next boot is normal again.
+# ---------------------------------------------------------------------------
+enter_maintenance() {
+    local locked_note=""
+    touch "$MAINT_FLAG"
+    overlay_active && locked_note="
+ The SD card is LOCKED: changes are lost when you restart.
+ To make lasting changes, unlock it (keep this stick plugged in):
+   sudo raspi-config nonint disable_overlayfs && sudo reboot
+"
+    mkdir -p /run/issue.d
+    cat > /run/issue.d/rch-maintenance.issue <<EOT
+
+ RCH STEAMER - MAINTENANCE MODE (HMI not started)
+ To return to the HMI: remove the USB stick, then type  sudo reboot
+$locked_note
+EOT
+    echo "Maintenance stick found: starting a login prompt instead of the HMI."
+    log_history "maintenance mode (USB stick)"
+    systemctl start --no-block getty@tty1.service
 }
 
 # ---------------------------------------------------------------------------
@@ -216,7 +251,12 @@ main() {
     mkdir -p "$WORK" "$STATE"
     PKG_NAME=""
     if [ "$mode" = --boot ]; then
-        find_usb_package || exit 0          # no stick or no ZIP: normal boot
+        find_usb_package; local have_zip=$?
+        if [ "$MAINT" = yes ]; then          # maintenance wins over an update
+            enter_maintenance
+            exit 0
+        fi
+        [ "$have_zip" -eq 0 ] || exit 0     # no stick or no ZIP: normal boot
         screen_start
     elif [ -n "$mode" ] && [ -f "$mode" ]; then
         PKG_NAME=$(basename "$mode")
