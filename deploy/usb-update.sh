@@ -56,7 +56,13 @@ log_history() {
     echo "$(date '+%Y-%m-%d %H:%M')  $*" >> "$STATE/update-history.log"
 }
 
-overlay_active() { grep -qw 'boot=overlay' /proc/cmdline; }
+# Is the SD card locked (read-only overlay) right now? Check what "/" really
+# is, rather than a boot setting name: Raspberry Pi OS has used both
+# "boot=overlay" (older) and "overlayroot=tmpfs" (Trixie) for the same lock.
+overlay_active() {
+    [ "$(findmnt -n -o FSTYPE / 2>/dev/null)" = overlay ] && return 0
+    grep -qwE 'boot=overlay|overlayroot=tmpfs' /proc/cmdline
+}
 
 reboot_now() {
     say "$1"
