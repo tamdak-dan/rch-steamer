@@ -154,11 +154,74 @@ install_system_files() {
     systemctl disable getty@tty1.service >/dev/null 2>&1 || true
 }
 
+# ---------------------------------------------------------------------------
+# Boot splash: show deploy/splash.png (or .jpg) instead of boot text.
+# Also used by the USB updater (--refresh); skips the slow initramfs rebuild
+# when nothing changed.
+# ---------------------------------------------------------------------------
+install_splash() {
+    local src="$1/deploy" img="" f key theme=/usr/share/plymouth/themes/rch-steamer
+    for f in splash.png splash.jpg splash.jpeg; do
+        if [ -f "$src/$f" ]; then img="$src/$f"; break; fi
+    done
+    if [ -z "$img" ]; then
+        warn "No deploy/splash.png or splash.jpg; boot splash not changed."
+        return 0
+    fi
+    if ! command -v plymouth-set-default-theme >/dev/null; then
+        warn "Plymouth isn't installed, so no boot splash. Run a full install to add it."
+        return 0
+    fi
+
+    key="$(cat "$img" "$src/plymouth/"* | sha256sum | cut -c1-64) rotate=${SCREEN_ROTATE:-0}"
+    if [ "$key" = "$(cat "$STATE/splash-installed" 2>/dev/null)" ]; then
+        return 0
+    fi
+
+    say "Installing boot splash from deploy/$(basename "$img") (about a minute)"
+    mkdir -p "$theme"
+    cp "$src/plymouth/rch-steamer.plymouth" "$src/plymouth/rch-steamer.script" "$theme/"
+    # Turn the picture to match the screen, so it reads the right way up.
+    # (Qt rotates clockwise for positive angles, same as SCREEN_ROTATE.)
+    QT_QPA_PLATFORM=offscreen "$VENV/bin/python" - "$img" "$theme/splash.png" "${SCREEN_ROTATE:-0}" <<'PY' || { warn "Couldn't read the splash image; boot splash not changed."; return 0; }
+import sys
+from PySide6.QtGui import QImage, QTransform
+src, dst, deg = sys.argv[1], sys.argv[2], int(sys.argv[3])
+img = QImage(src)
+if img.isNull():
+    sys.exit("Can't read " + src)
+if deg:
+    img = img.transformed(QTransform().rotate(deg))
+if not img.save(dst, "PNG"):
+    sys.exit("Can't write " + dst)
+PY
+
+    # Keep the splash on screen until the HMI draws over it, instead of
+    # flashing back to boot text in between.
+    mkdir -p /etc/systemd/system/plymouth-quit.service.d
+    cat > /etc/systemd/system/plymouth-quit.service.d/rch-retain-splash.conf <<'UNIT'
+[Service]
+ExecStart=
+ExecStart=-/usr/bin/plymouth quit --retain-splash
+UNIT
+    systemctl daemon-reload
+
+    # The splash is built into the boot image (initramfs), so rebuild it.
+    plymouth-set-default-theme rch-steamer
+    if update-initramfs -u >/dev/null 2>&1; then
+        echo "$key" > "$STATE/splash-installed"
+    else
+        warn "Couldn't rebuild the boot image; the new splash may not show."
+    fi
+}
+
 if [ "$REFRESH_ONLY" = yes ]; then
     user="$(cat "$STATE/hmi-user" 2>/dev/null || true)"
     [ -n "$user" ] || user="$(sed -n 's/^User=//p' /etc/systemd/system/rch-kiosk.service 2>/dev/null || true)"
     [ -n "$user" ] || die "Can't tell which account runs the HMI. Run a full install."
     install_system_files "$SRC_DIR" "$user"
+    mkdir -p "$STATE"
+    install_splash "$SRC_DIR" || warn "Boot splash not updated."
     exit 0
 fi
 
@@ -231,6 +294,7 @@ WANTED=(
     libxkbcommon0 libfontconfig1 libfreetype6 libdbus-1-3
     "libglib2.0-0t64|libglib2.0-0"
     fonts-dejavu-core
+    plymouth "plymouth-themes|"          # boot splash (deploy/splash.png)
     wlr-randr                              # screen rotation under cage
 )
 PKGS=()
@@ -240,7 +304,8 @@ for entry in "${WANTED[@]}"; do
     for p in "${choices[@]}"; do
         if apt-cache show "$p" >/dev/null 2>&1; then found="$p"; break; fi
     done
-    if [ -n "$found" ]; then PKGS+=("$found"); else warn "Package not available, skipping: $entry"; fi
+    if [ -n "$found" ]; then PKGS+=("$found")
+    elif [[ "$entry" != *"|" ]]; then warn "Package not available, skipping: $entry"; fi
 done
 DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends "${PKGS[@]}"
 command -v cage >/dev/null || die "cage didn't install; it's required for the kiosk."
@@ -293,6 +358,7 @@ set_key LOCK_SD "$( [ "$NO_LOCK" = yes ] && echo no || echo yes )"
 chmod 644 "$CONF"
 
 install_system_files "$APP_DIR" "$RUN_USER"
+install_splash "$APP_DIR"
 usermod -aG video,render,input "$RUN_USER"
 
 # ---------------------------------------------------------------------------
@@ -331,7 +397,10 @@ for t in "${tokens[@]}"; do
     [[ "$t" == fbcon=rotate:* ]] && continue
     new+=("$t")
 done
-for t in quiet loglevel=3 logo.nologo; do
+# splash + ignore-serial-consoles: show the Plymouth splash (with
+# console=serial0 present it would otherwise stay in text mode).
+# vt.global_cursor_default=0: no blinking text cursor.
+for t in quiet loglevel=3 logo.nologo splash plymouth.ignore-serial-consoles vt.global_cursor_default=0; do
     [[ " ${new[*]} " == *" $t "* ]] || new+=("$t")
 done
 [ "$DISPLAY_MODE" = hdmi-800x480 ] && new+=("video=HDMI-A-1:800x480@60D")
