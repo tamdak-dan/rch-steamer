@@ -1,0 +1,19 @@
+# RCH Steamer boot splash (Plymouth script theme).
+# Shows splash.png centered on a black screen, shrunk to fit if needed.
+# install.sh copies deploy/splash.png here, already rotated to match the
+# screen, so this script doesn't need to know about rotation.
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+image = Image("splash.png");
+screen_w = Window.GetWidth();
+screen_h = Window.GetHeight();
+
+scale = Math.Min(screen_w / image.GetWidth(), screen_h / image.GetHeight());
+if (scale < 1)
+    image = image.Scale(image.GetWidth() * scale, image.GetHeight() * scale);
+
+splash = Sprite(image);
+splash.SetX(Window.GetX() + (screen_w - image.GetWidth()) / 2);
+splash.SetY(Window.GetY() + (screen_h - image.GetHeight()) / 2);

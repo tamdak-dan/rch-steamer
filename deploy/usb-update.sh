@@ -55,6 +55,7 @@ say() {
 }
 screen_start() {
     SCREEN=yes
+    plymouth quit 2>/dev/null || true     # take the boot splash down so text shows
     setfont -C "$TTY" Uni3-TerminusBold32x16 2>/dev/null || true
     printf '\033c\n  RCH STEAMER - SOFTWARE UPDATE\n\n' > "$TTY" 2>/dev/null || true
 }
@@ -148,6 +149,7 @@ enter_maintenance() {
 $locked_note
 EOT
     echo "Maintenance stick found: starting a login prompt instead of the HMI."
+    plymouth quit 2>/dev/null || true     # take the boot splash down so text shows
     log_history "maintenance mode (USB stick)"
     systemctl start --no-block getty@tty1.service
 }

@@ -45,6 +45,10 @@ The goal: one **master SD card image** that boots straight into the HMI, full sc
 
 Every unit made this way has the same IP address. That's fine when each machine has its own network. If two Pis ever share a network, change one unit's address (UPDATING.md, *Changing a unit's settings*).
 
+## Boot splash
+
+While the Pi starts, the screen shows **`deploy/splash.png`** instead of boot text. To use your own picture, replace that file (keep the name; `splash.jpg` also works if there's no `splash.png`). Make it **800×480, landscape**, the way it should look on the finished unit. The installer turns it to match `--rotate`. The new picture goes on at the next install or USB update (that update takes about a minute longer).
+
 ## Screen troubleshooting
 
 The installer assumes a touchscreen that works when plugged in ("auto"). If the screen stays black or the picture is the wrong size, rerun the installer with the option for your screen (needs the internet cable again, and unlock first: `sudo raspi-config nonint disable_overlayfs && sudo reboot`):

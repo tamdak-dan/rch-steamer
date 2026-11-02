@@ -4,7 +4,7 @@
 
 [Unit]
 Description=RCH Steamer HMI (kiosk)
-After=systemd-user-sessions.service rch-usb-update.service
+After=systemd-user-sessions.service rch-usb-update.service plymouth-quit-wait.service
 Conflicts=getty@tty1.service
 # Skipped for one boot when a maintenance USB stick is plugged in.
 ConditionPathExists=!/run/rch-maintenance

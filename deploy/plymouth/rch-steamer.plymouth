@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=RCH Steamer
+Description=Shows deploy/splash.png while the Pi boots
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/rch-steamer
+ScriptFile=/usr/share/plymouth/themes/rch-steamer/rch-steamer.script
