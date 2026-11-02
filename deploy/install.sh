@@ -131,7 +131,17 @@ install_system_files() {
     install_file "$src/systemd/rch-usb-update.service" /etc/systemd/system/rch-usb-update.service 644
 
     systemctl daemon-reload
-    systemctl enable rch-usb-update.service rch-kiosk.service >/dev/null 2>&1
+    local unit
+    for unit in rch-usb-update.service rch-kiosk.service; do
+        # "enable" refuses while a unit is blocked for this boot (e.g. by
+        # systemd.mask= on the kernel command line during maintenance).
+        # Enabling is just this link, so make it directly in that case.
+        if ! systemctl enable "$unit" >/dev/null 2>&1; then
+            mkdir -p /etc/systemd/system/multi-user.target.wants
+            ln -sf "/etc/systemd/system/$unit" "/etc/systemd/system/multi-user.target.wants/$unit"
+            warn "$unit is blocked for this boot; it will start after the next reboot."
+        fi
+    done
     # The kiosk takes over the screen's first console instead of a login prompt.
     systemctl disable getty@tty1.service >/dev/null 2>&1 || true
 }
