@@ -17,6 +17,7 @@
 #   --plc-ip ADDR        CX7000 IP address (192.168.137.6)
 #   --plc-netid ID       CX7000 AMS Net ID (5.177.96.78.1.1)
 #   --display MODE       auto | hdmi-800x480 | dsi-5inch (auto)
+#   --rotate DEG         Rotate the screen 0, 90, 180 or 270 degrees clockwise (0)
 #   --cpu-mhz N          Max CPU speed, lower runs cooler (1200; 0 = Pi default)
 #   --keep-network       Don't set a fixed IP; leave networking as it is
 #   --no-lock            Leave the SD card writable (for development)
@@ -82,6 +83,7 @@ while [ $# -gt 0 ]; do
         --plc-ip)       RCH_PLC_IP="$2"; shift ;;
         --plc-netid)    RCH_PLC_AMS_NETID="$2"; shift ;;
         --display)      DISPLAY_MODE="$2"; shift ;;
+        --rotate)       SCREEN_ROTATE="$2"; shift ;;
         --cpu-mhz)      CPU_MHZ="$2"; shift ;;
         --keep-network) KEEP_NETWORK=yes ;;
         --no-lock)      NO_LOCK=yes ;;
@@ -96,6 +98,8 @@ done
 
 case "$DISPLAY_MODE" in auto|hdmi-800x480|dsi-5inch) ;; *)
     die "--display must be auto, hdmi-800x480 or dsi-5inch" ;; esac
+SCREEN_ROTATE="${SCREEN_ROTATE:-0}"
+case "$SCREEN_ROTATE" in 0|90|180|270) ;; *) die "--rotate must be 0, 90, 180 or 270" ;; esac
 [[ "$CPU_MHZ" =~ ^[0-9]+$ ]] || die "--cpu-mhz must be a number"
 [[ "$PI_PREFIX" =~ ^[0-9]+$ ]] || die "--pi-ip must look like 192.168.137.20/24"
 
@@ -177,7 +181,7 @@ RCH Steamer HMI installer
   HMI runs as ....... $RUN_USER
   Pi fixed IP ....... $( [ "$KEEP_NETWORK" = yes ] && echo "(unchanged)" || echo "$PI_IP/$PI_PREFIX${PI_GATEWAY:+ via $PI_GATEWAY}")
   PLC ............... $RCH_PLC_IP  (AMS Net ID $RCH_PLC_AMS_NETID)
-  Display ........... $DISPLAY_MODE
+  Display ........... $DISPLAY_MODE, rotated $SCREEN_ROTATE° clockwise
   Max CPU ........... $( [ "$CPU_MHZ" = 0 ] && echo "Pi default" || echo "$CPU_MHZ MHz")
   Wi-Fi, Bluetooth .. turned off
   SD card ........... $( [ "$NO_LOCK" = yes ] && echo "writable" || echo "locked read-only after setup")
@@ -202,6 +206,7 @@ WANTED=(
     libxkbcommon0 libfontconfig1 libfreetype6 libdbus-1-3
     "libglib2.0-0t64|libglib2.0-0"
     fonts-dejavu-core
+    wlr-randr                              # screen rotation under cage
 )
 PKGS=()
 for entry in "${WANTED[@]}"; do
@@ -256,6 +261,7 @@ set_key PI_GATEWAY "$PI_GATEWAY"
 set_key RCH_PLC_IP "$RCH_PLC_IP"
 set_key RCH_PLC_AMS_NETID "$RCH_PLC_AMS_NETID"
 set_key RCH_LOCAL_AMS_NETID "${RCH_LOCAL_AMS_NETID:-}"
+set_key SCREEN_ROTATE "$SCREEN_ROTATE"
 set_key LOCK_SD "$( [ "$NO_LOCK" = yes ] && echo no || echo yes )"
 chmod 644 "$CONF"
 
@@ -290,12 +296,19 @@ read -r -a tokens < "$CMDLINE" || true
 new=()
 for t in "${tokens[@]}"; do
     [[ "$t" == video=HDMI-A-1:* ]] && continue      # we re-add it below if needed
+    [[ "$t" == fbcon=rotate:* ]] && continue
     new+=("$t")
 done
 for t in quiet loglevel=3 logo.nologo; do
     [[ " ${new[*]} " == *" $t "* ]] || new+=("$t")
 done
 [ "$DISPLAY_MODE" = hdmi-800x480 ] && new+=("video=HDMI-A-1:800x480@60D")
+# Rotate the text console too, so boot and update messages read the right way.
+case "$SCREEN_ROTATE" in
+    90)  new+=("fbcon=rotate:1") ;;
+    180) new+=("fbcon=rotate:2") ;;
+    270) new+=("fbcon=rotate:3") ;;
+esac
 echo "${new[*]}" > "$CMDLINE"
 
 # ---------------------------------------------------------------------------

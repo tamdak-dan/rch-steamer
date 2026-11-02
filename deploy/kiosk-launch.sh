@@ -27,5 +27,14 @@ export RCH_LOCAL_AMS_NETID="${RCH_LOCAL_AMS_NETID:-}"
 export QT_QPA_PLATFORM=wayland
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 
+# Rotate the screen if asked (SCREEN_ROTATE in /etc/rch-steamer.conf).
+# cage has no rotate option of its own; wlr-randr asks it to rotate each
+# output. Touch input follows the rotation.
+if [ "${SCREEN_ROTATE:-0}" != 0 ] && command -v wlr-randr >/dev/null; then
+    for output in $(wlr-randr 2>/dev/null | awk '/^[^ \t]/ {print $1}'); do
+        wlr-randr --output "$output" --transform "$SCREEN_ROTATE" || true
+    done
+fi
+
 cd "$APP_DIR"
 exec "$VENV/bin/python" app.py
