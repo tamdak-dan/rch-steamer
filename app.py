@@ -10,7 +10,7 @@ def main():
     window = MainWindow()
     
     # 3. Render the window on the RPI screen
-    window.show()
+    window.showFullScreen()
     
     # 4. Start the clean event loop execution
     sys.exit(app.exec())
