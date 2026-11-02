@@ -27,7 +27,7 @@
 #
 # Safe to run again: it replaces its own settings rather than adding twice.
 # =============================================================================
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$(dirname "$SCRIPT_DIR")"
@@ -41,6 +41,9 @@ MARK_END="# <<< rch-steamer <<<"
 say()  { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[1;33mWARNING: %s\033[0m\n' "$*" >&2; }
 die()  { printf '\n\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
+
+# Never stop silently: if any command fails unexpectedly, say where.
+trap 'printf "\n\033[1;31mERROR: setup stopped unexpectedly at line %s of install.sh (command: %s).\nIt is safe to run the installer again.\033[0m\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
 overlay_active() { grep -qw 'boot=overlay' /proc/cmdline; }
 
@@ -144,10 +147,13 @@ id "$RUN_USER" >/dev/null 2>&1 || die "Account '$RUN_USER' doesn't exist."
 
 # PySide6 for the Pi needs glibc 2.39+, i.e. Raspberry Pi OS based on
 # Debian 13 "Trixie" or newer. Older "Bookworm" images can't install it.
-GLIBC="$(ldd --version 2>/dev/null | head -1 | awk '{print $NF}')"
+# (getconf prints e.g. "glibc 2.41". Don't use "ldd --version | head -1":
+# head closes the pipe early and, with pipefail, that randomly fails.)
+GLIBC="$(getconf GNU_LIBC_VERSION 2>/dev/null || true)"
+GLIBC="${GLIBC##* }"
 # shellcheck disable=SC1091
 . /etc/os-release
-if [ "$(printf '%s\n' 2.39 "$GLIBC" | sort -V | head -1)" != 2.39 ]; then
+if [ "$(printf '%s\n' 2.39 "$GLIBC" | sort -V | sed -n 1p)" != 2.39 ]; then
     die "This OS is too old (${PRETTY_NAME:-unknown}). Re-flash the card with
 the current 'Raspberry Pi OS Lite (64-bit)' (Trixie or newer) using Raspberry Pi Imager."
 fi
