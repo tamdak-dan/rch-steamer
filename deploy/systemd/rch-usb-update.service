@@ -1,0 +1,17 @@
+# At every boot, before the HMI starts: look for an update ZIP on a USB
+# stick and install it. Takes about 3 seconds when no stick is plugged in.
+
+[Unit]
+Description=RCH Steamer: install update from USB stick
+After=local-fs.target systemd-udev-trigger.service
+Before=rch-kiosk.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/rch-usb-update --boot
+TimeoutStartSec=20min
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
