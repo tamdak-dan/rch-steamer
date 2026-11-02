@@ -283,7 +283,10 @@ sed -i "/^$MARK_BEGIN/,/^$MARK_END/d" "$BOOT/config.txt"
 
 # cmdline.txt is a single line of space-separated settings.
 CMDLINE="$BOOT/cmdline.txt"
-read -r -a tokens < "$CMDLINE"
+# The Pi's cmdline.txt usually has no line break at the end; "read" still
+# reads the line but reports failure, so don't let that stop the script.
+read -r -a tokens < "$CMDLINE" || true
+[ "${#tokens[@]}" -gt 0 ] || die "$CMDLINE is empty; refusing to change boot settings."
 new=()
 for t in "${tokens[@]}"; do
     [[ "$t" == video=HDMI-A-1:* ]] && continue      # we re-add it below if needed
