@@ -156,11 +156,11 @@ apply_package() {
     mv "$new" "$APP_DIR"
 
     # Pick up any changes to the launcher, services or this updater.
-    if ! "$APP_DIR/deploy/install.sh" --refresh; then
+    if ! bash "$APP_DIR/deploy/install.sh" --refresh; then
         say "ERROR: setup step failed. Restoring old version."
         rm -rf "$APP_DIR"
         mv "$APP_DIR.prev" "$APP_DIR"
-        "$APP_DIR/deploy/install.sh" --refresh || true
+        bash "$APP_DIR/deploy/install.sh" --refresh || true
         return 1
     fi
     return 0
@@ -176,7 +176,7 @@ do_rollback() {
     mv "$APP_DIR" "$APP_DIR.rollback-tmp"
     mv "$APP_DIR.prev" "$APP_DIR"
     mv "$APP_DIR.rollback-tmp" "$APP_DIR.prev"
-    "$APP_DIR/deploy/install.sh" --refresh || true
+    bash "$APP_DIR/deploy/install.sh" --refresh || true
     # The previous version's requirements may differ; record what's in place.
     cp "$APP_DIR/requirements.txt" "$STATE/requirements.installed" 2>/dev/null || true
     rm -f "$STATE/applied-sha"
