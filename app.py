@@ -28,12 +28,6 @@ def main():
 
     # 2. Create the main window instance (which builds the tabs internally)
     window = MainWindow()
-<<<<<<< HEAD
-    
-    # 3. Render the window on the RPI screen
-    window.showFullScreen()
-    
-=======
 
     # 3. Render the window. On the Pi: full screen, no mouse pointer.
     if KIOSK:
@@ -42,7 +36,6 @@ def main():
     else:
         window.show()
 
->>>>>>> b5a223f5f46f7e57d1f4b6d2edc166e6cb3a749d
     # 4. Start the clean event loop execution
     sys.exit(app.exec())
 
