@@ -1,0 +1,10 @@
+# Python packages the HMI needs. The Pi installs these into its own
+# virtual environment (see deploy/install.sh).
+#
+# PySide6-Essentials is the slim part of PySide6 (QtCore, QtGui, QtWidgets,
+# QtUiTools). It's all this app uses and is far smaller than full PySide6.
+# If you change this file, read deploy/UPDATING.md ("If you add a Python
+# package") — the Pi has no internet, so new packages must ride along on
+# the USB stick.
+PySide6-Essentials>=6.8,<7
+pyads>=3.4,<4

@@ -1,0 +1,30 @@
+# RCH Steamer HMI: starts the app full screen on the touchscreen at boot and
+# restarts it within a few seconds if it ever stops.
+# @USER@ is replaced by install.sh.
+
+[Unit]
+Description=RCH Steamer HMI (kiosk)
+After=systemd-user-sessions.service rch-usb-update.service
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+User=@USER@
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+UtmpIdentifier=tty1
+UtmpMode=user
+Environment=XDG_SESSION_TYPE=wayland
+# -s lets a technician switch to a text console with Ctrl+Alt+F2.
+ExecStart=/usr/bin/cage -s -- /usr/local/bin/rch-kiosk-launch
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
