@@ -54,6 +54,8 @@ The installer assumes a touchscreen that works when plugged in ("auto"). If the 
 | Waveshare 5" **HDMI** (800×480) | `--display hdmi-800x480` |
 | Waveshare 5" **DSI** (ribbon cable) | `--display dsi-5inch` |
 
-**Screen sideways or upside down?** Add `--rotate 90` (or `180` or `270`; degrees clockwise). Touch rotates with the picture. If it turns the wrong way, use `270` instead of `90`.
+**Screen sideways or upside down?** Add `--rotate 90` (or `180` or `270`; degrees clockwise).
+
+**Touch not working?** Waveshare screens with **XPT2046** resistive touch (wired to the GPIO pins) need `--touch xpt2046`. If touch works but taps land in the wrong place, add `--touch-rotate` with another value (try `270`, then `180`, then `0`) until taps line up.
 
 For other screens, check the maker's setup page for the `config.txt` lines it needs.

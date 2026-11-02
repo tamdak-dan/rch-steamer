@@ -18,6 +18,8 @@
 #   --plc-netid ID       CX7000 AMS Net ID (5.177.96.78.1.1)
 #   --display MODE       auto | hdmi-800x480 | dsi-5inch (auto)
 #   --rotate DEG         Rotate the screen 0, 90, 180 or 270 degrees clockwise (0)
+#   --touch CHIP         none | xpt2046 (Waveshare GPIO resistive touch) (none)
+#   --touch-rotate DEG   Rotate touch separately, if taps land wrong (= --rotate)
 #   --cpu-mhz N          Max CPU speed, lower runs cooler (1200; 0 = Pi default)
 #   --keep-network       Don't set a fixed IP; leave networking as it is
 #   --no-lock            Leave the SD card writable (for development)
@@ -90,6 +92,8 @@ while [ $# -gt 0 ]; do
         --plc-netid)    RCH_PLC_AMS_NETID="$2"; shift ;;
         --display)      DISPLAY_MODE="$2"; shift ;;
         --rotate)       SCREEN_ROTATE="$2"; shift ;;
+        --touch)        TOUCH="$2"; shift ;;
+        --touch-rotate) TOUCH_ROTATE="$2"; shift ;;
         --cpu-mhz)      CPU_MHZ="$2"; shift ;;
         --keep-network) KEEP_NETWORK=yes ;;
         --no-lock)      NO_LOCK=yes ;;
@@ -106,6 +110,10 @@ case "$DISPLAY_MODE" in auto|hdmi-800x480|dsi-5inch) ;; *)
     die "--display must be auto, hdmi-800x480 or dsi-5inch" ;; esac
 SCREEN_ROTATE="${SCREEN_ROTATE:-0}"
 case "$SCREEN_ROTATE" in 0|90|180|270) ;; *) die "--rotate must be 0, 90, 180 or 270" ;; esac
+TOUCH="${TOUCH:-none}"
+case "$TOUCH" in none|xpt2046) ;; *) die "--touch must be none or xpt2046" ;; esac
+TOUCH_ROTATE="${TOUCH_ROTATE:-}"
+case "$TOUCH_ROTATE" in ""|0|90|180|270) ;; *) die "--touch-rotate must be 0, 90, 180 or 270" ;; esac
 [[ "$CPU_MHZ" =~ ^[0-9]+$ ]] || die "--cpu-mhz must be a number"
 [[ "$PI_PREFIX" =~ ^[0-9]+$ ]] || die "--pi-ip must look like 192.168.137.20/24"
 
@@ -198,6 +206,7 @@ RCH Steamer HMI installer
   Pi fixed IP ....... $( [ "$KEEP_NETWORK" = yes ] && echo "(unchanged)" || echo "$PI_IP/$PI_PREFIX${PI_GATEWAY:+ via $PI_GATEWAY}")
   PLC ............... $RCH_PLC_IP  (AMS Net ID $RCH_PLC_AMS_NETID)
   Display ........... $DISPLAY_MODE, rotated $SCREEN_ROTATE° clockwise
+  Touch ............. $TOUCH, rotated ${TOUCH_ROTATE:-$SCREEN_ROTATE}° clockwise
   Max CPU ........... $( [ "$CPU_MHZ" = 0 ] && echo "Pi default" || echo "$CPU_MHZ MHz")
   Wi-Fi, Bluetooth .. turned off
   SD card ........... $( [ "$NO_LOCK" = yes ] && echo "writable" || echo "locked read-only after setup")
@@ -278,6 +287,8 @@ set_key RCH_PLC_IP "$RCH_PLC_IP"
 set_key RCH_PLC_AMS_NETID "$RCH_PLC_AMS_NETID"
 set_key RCH_LOCAL_AMS_NETID "${RCH_LOCAL_AMS_NETID:-}"
 set_key SCREEN_ROTATE "$SCREEN_ROTATE"
+set_key TOUCH "$TOUCH"
+set_key TOUCH_ROTATE "$TOUCH_ROTATE"
 set_key LOCK_SD "$( [ "$NO_LOCK" = yes ] && echo no || echo yes )"
 chmod 644 "$CONF"
 
@@ -298,6 +309,11 @@ sed -i "/^$MARK_BEGIN/,/^$MARK_END/d" "$BOOT/config.txt"
     [ "$CPU_MHZ" != 0 ] && echo "arm_freq=$CPU_MHZ"
     case "$DISPLAY_MODE" in
         hdmi-800x480) echo "hdmi_force_hotplug=1" ;;
+    esac
+    case "$TOUCH" in
+        # Waveshare XPT2046 resistive touch on SPI (settings from Waveshare).
+        xpt2046) echo "dtparam=spi=on"
+                 echo "dtoverlay=ads7846,cs=1,penirq=25,penirq_pull=2,speed=50000,keep_vref_on=0,swapxy=0,pmax=255,xohms=150,xmin=200,xmax=3900,ymin=200,ymax=3900" ;;
         dsi-5inch)    echo "dtoverlay=vc4-kms-dsi-waveshare-panel,5_0_inch" ;;
     esac
     echo "$MARK_END"
@@ -326,6 +342,24 @@ case "$SCREEN_ROTATE" in
     270) new+=("fbcon=rotate:3") ;;
 esac
 echo "${new[*]}" > "$CMDLINE"
+
+# Touch rotation. Rotating the display doesn't turn touch, so give libinput
+# a calibration matrix for every touchscreen.
+TOUCH_RULE=/etc/udev/rules.d/99-rch-touch.rules
+case "${TOUCH_ROTATE:-$SCREEN_ROTATE}" in
+    90)  matrix="0 -1 1 1 0 0" ;;
+    180) matrix="-1 0 1 0 -1 1" ;;
+    270) matrix="0 1 0 -1 0 1" ;;
+    *)   matrix="" ;;
+esac
+if [ -n "$matrix" ]; then
+    {
+        echo "# Written by rch-steamer deploy/install.sh: rotate touch to match the screen."
+        echo "ENV{ID_INPUT_TOUCHSCREEN}==\"1\", ENV{LIBINPUT_CALIBRATION_MATRIX}=\"$matrix\""
+    } > "$TOUCH_RULE"
+else
+    rm -f "$TOUCH_RULE"
+fi
 
 # ---------------------------------------------------------------------------
 # 5. Lighter, sturdier system
