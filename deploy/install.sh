@@ -46,7 +46,13 @@ die()  { printf '\n\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
 # Never stop silently: if any command fails unexpectedly, say where.
 trap 'printf "\n\033[1;31mERROR: setup stopped unexpectedly at line %s of install.sh (command: %s).\nIt is safe to run the installer again.\033[0m\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
-overlay_active() { grep -qw 'boot=overlay' /proc/cmdline; }
+# Is the SD card locked (read-only overlay) right now? Check what "/" really
+# is, rather than a boot setting name: Raspberry Pi OS has used both
+# "boot=overlay" (older) and "overlayroot=tmpfs" (Trixie) for the same lock.
+overlay_active() {
+    [ "$(findmnt -n -o FSTYPE / 2>/dev/null)" = overlay ] && return 0
+    grep -qwE 'boot=overlay|overlayroot=tmpfs' /proc/cmdline
+}
 
 # Copy a file into place atomically. A running copy of the file (e.g. the
 # updater replacing itself) keeps working because it still has the old one.
