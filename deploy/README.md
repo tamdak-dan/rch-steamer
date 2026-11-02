@@ -19,13 +19,13 @@ The goal: one **master SD card image** that boots straight into the HMI, full sc
    ```
    sudo apt install -y git
    git clone https://github.com/tamdak-dan/rch-steamer.git
-   sudo rch-steamer/deploy/install.sh
+   sudo bash rch-steamer/deploy/install.sh
    ```
    It shows a summary and asks to continue. The defaults match the bench setup: Pi at `192.168.137.20`, PLC at `192.168.137.6`. If your machine network is different, add options, for example:
    ```
-   sudo rch-steamer/deploy/install.sh --pi-ip 192.168.1.20/24 --plc-ip 192.168.1.10 --plc-netid 5.177.96.78.1.1
+   sudo bash rch-steamer/deploy/install.sh --pi-ip 192.168.1.20/24 --plc-ip 192.168.1.10 --plc-netid 5.177.96.78.1.1
    ```
-   Run `rch-steamer/deploy/install.sh --help` for all options.
+   Run `bash rch-steamer/deploy/install.sh --help` for all options.
 4. **Reboot:** `sudo reboot`. The HMI should fill the screen. If the picture is wrong, see *Screen troubleshooting* below.
 5. **Connect to the PLC.** Plug the Pi into the machine network. If the HMI shows "disconnected", the PLC needs a route for this Pi (once per PLC). Press **Ctrl+Alt+F2**, log in, run `rch-add-route`, and enter the PLC's login. Press **Ctrl+Alt+F1** to go back to the HMI.
 

@@ -8,7 +8,7 @@
 # Run it on the Pi, with Ethernet plugged into a network that has internet:
 #
 #     git clone https://github.com/tamdak-dan/rch-steamer.git
-#     sudo rch-steamer/deploy/install.sh
+#     sudo bash rch-steamer/deploy/install.sh
 #
 # Options (all optional; defaults shown):
 #   --pi-ip ADDR/PREFIX  This Pi's fixed address on the machine network
