@@ -1,5 +1,12 @@
+import time
+
 import pyads
 from PySide6.QtCore import QObject, QThread, Signal, Slot, QTimer
+
+# When the PLC's AMS Net ID isn't configured, it's asked for over the network
+# (see AdsWorker._discover_net_id). Wait this long between attempts while the
+# PLC can't be reached, so a missing PLC doesn't mean a query every poll.
+NET_ID_RETRY_S = 5
 
 
 # ---------------------------------------------------------------------------
@@ -104,7 +111,7 @@ class AdsWorker(QObject):
     connection_changed = Signal(bool) # True on connect, False on drop
     error_occurred = Signal(str)      # human-readable message for logs/UI
 
-    def __init__(self, ams_net_id: str, ip_address: str,
+    def __init__(self, ams_net_id: str | None, ip_address: str,
                  ams_port: int = pyads.PORT_TC3PLC1, poll_ms: int = 250):
         super().__init__()
 
@@ -112,14 +119,18 @@ class AdsWorker(QObject):
         # pyads connection yet. __init__ runs on the MAIN thread (because
         # that's where you construct the object), and the connection has to
         # be created on the thread that will use it. See start() below.
+        #
+        # ams_net_id=None means "ask the PLC": every CX has its own Net ID,
+        # so one SD card image can then run on any machine.
         self._ams_net_id = ams_net_id
         self._ip_address = ip_address
         self._ams_port = ams_port
         self._poll_ms = poll_ms
         self._hb = 0        # HMI -> PLC heartbeat counter
 
-        self._plc = None    # pyads.Connection, created in start()
+        self._plc = None    # pyads.Connection, created by _connect()
         self._timer = None  # QTimer, created in start()
+        self._next_discovery = 0.0   # time.monotonic() of the next Net ID query
 
     # -----------------------------------------------------------------------
     # START  —  the first thing that runs ON the background thread
@@ -138,7 +149,6 @@ class AdsWorker(QObject):
     # -----------------------------------------------------------------------
     @Slot()
     def start(self):
-        self._plc = pyads.Connection(self._ams_net_id, self._ams_port, self._ip_address)
         self._connect()
 
         # QTimer instead of a `while True: sleep()` loop. A sleep loop would
@@ -160,12 +170,42 @@ class AdsWorker(QObject):
     # should degrade the HMI, not kill it.
     # -----------------------------------------------------------------------
     def _connect(self):
+        # The Connection object needs the PLC's Net ID. If it wasn't given,
+        # find it first; until that works, stay disconnected and retry later.
+        if self._plc is None:
+            net_id = self._ams_net_id or self._discover_net_id()
+            if net_id is None:
+                self.connection_changed.emit(False)
+                return
+            self._plc = pyads.Connection(net_id, self._ams_port, self._ip_address)
+
         try:
             self._plc.open()
             self.connection_changed.emit(True)
         except pyads.ADSError as e:
             self.connection_changed.emit(False)
             self.error_occurred.emit(f"ADS connect failed: {e}")
+
+    # -----------------------------------------------------------------------
+    # DISCOVER  —  ask the PLC at ip_address for its AMS Net ID
+    # -----------------------------------------------------------------------
+    # Beckhoff controllers answer a small UDP query on port 48899 (the same
+    # service TwinCAT's "Broadcast Search" and route setup use). The query
+    # blocks for up to ~5 s if nothing answers, which is fine here: this is
+    # the worker thread, so the UI keeps running. Returns None on failure.
+    # -----------------------------------------------------------------------
+    def _discover_net_id(self):
+        now = time.monotonic()
+        if now < self._next_discovery:
+            return None
+        self._next_discovery = now + NET_ID_RETRY_S
+        try:
+            net_id = pyads.ads.adsGetNetIdForPLC(self._ip_address)
+        except (OSError, RuntimeError, ValueError) as e:   # timeout, unreachable, odd reply
+            self.error_occurred.emit(f"Couldn't get the PLC's AMS Net ID from {self._ip_address}: {e}")
+            return None
+        self.error_occurred.emit(f"PLC at {self._ip_address} has AMS Net ID {net_id}")
+        return net_id
 
     # -----------------------------------------------------------------------
     # POLL  —  fires every poll_ms, this is the heartbeat of the module
@@ -219,6 +259,10 @@ class AdsWorker(QObject):
                 # close() on an already-dead socket can itself throw.
                 # Nothing useful to do about it, so swallow it.
                 pass
+            # If the Net ID was looked up rather than configured, look it up
+            # again on reconnect, in case the controller was swapped.
+            if not self._ams_net_id:
+                self._plc = None
 
     # -----------------------------------------------------------------------
     # WRITE  —  the one inbound path, UI thread -> PLC
@@ -285,7 +329,7 @@ class AdsClient(QObject):
     # requests from the main thread into the worker thread.
     _write_requested = Signal(str, object)
 
-    def __init__(self, ams_net_id: str, ip_address: str, poll_ms: int = 250):
+    def __init__(self, ams_net_id: str | None, ip_address: str, poll_ms: int = 250):
         super().__init__()
 
         # --- The three lines that do the actual threading ------------------

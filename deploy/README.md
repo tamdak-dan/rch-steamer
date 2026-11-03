@@ -21,9 +21,9 @@ The goal: one **master SD card image** that boots straight into the HMI, full sc
    git clone https://github.com/tamdak-dan/rch-steamer.git
    sudo bash rch-steamer/deploy/install.sh
    ```
-   It shows a summary and asks to continue. The defaults match the bench setup: Pi at `192.168.137.20`, PLC at `192.168.137.6`. If your machine network is different, add options, for example:
+   It shows a summary and asks to continue. The defaults match the machine network: Pi at `192.168.1.20`, PLC at `192.168.1.10`. The HMI asks the PLC for its AMS Net ID when it starts, so you don't need to enter it. If a machine is different, add options, for example:
    ```
-   sudo bash rch-steamer/deploy/install.sh --pi-ip 192.168.1.20/24 --plc-ip 192.168.1.10 --plc-netid 5.177.96.78.1.1
+   sudo bash rch-steamer/deploy/install.sh --pi-ip 192.168.1.21/24 --plc-ip 192.168.1.11
    ```
    Run `bash rch-steamer/deploy/install.sh --help` for all options.
 4. **Reboot:** `sudo reboot`. The HMI should fill the screen. If the picture is wrong, see *Screen troubleshooting* below.
