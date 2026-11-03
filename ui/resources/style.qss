@@ -89,7 +89,7 @@ QLabel#PLC_nSteamFlowStpt {
 }
 
 QSlider#horizontalSlider {
-    min-height: 60px;                    /* overall touch target */
+    min-height: 50px;                    /* touch target; 60px made the HMI 10px taller than the 480px screen */
 }
 QSlider#horizontalSlider::groove:horizontal {
     height: 16px;
