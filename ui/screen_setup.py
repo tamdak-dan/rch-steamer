@@ -92,7 +92,9 @@ class MainWindow(QMainWindow):
         self.ads = AdsClient(
             # On the Pi these come from /etc/rch-steamer.conf; the values
             # after the comma are used when the setting isn't there.
-            ams_net_id=os.environ.get("RCH_PLC_AMS_NETID", "5.177.96.78.1.1"),  # CX7000 AMS Net ID
+            # CX7000 AMS Net ID. Blank/unset = ask the PLC for it, so one image
+            # works on any controller (each CX has its own Net ID).
+            ams_net_id=os.environ.get("RCH_PLC_AMS_NETID") or None,
             ip_address=os.environ.get("RCH_PLC_IP", "192.168.1.10"),           # CX7000 IP address
             poll_ms=250,
         )

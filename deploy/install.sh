@@ -15,7 +15,7 @@
 #                        (192.168.1.20/24)
 #   --gateway ADDR       Gateway for the machine network (none)
 #   --plc-ip ADDR        CX7000 IP address (192.168.1.10)
-#   --plc-netid ID       CX7000 AMS Net ID (5.177.96.78.1.1)
+#   --plc-netid ID       CX7000 AMS Net ID (blank: the HMI asks the PLC)
 #   --display MODE       auto | hdmi-800x480 | dsi-5inch (auto)
 #   --rotate DEG         Rotate the screen 0, 90, 180 or 270 degrees clockwise (0)
 #   --touch CHIP         none | xpt2046 (Waveshare GPIO resistive touch) (none)
@@ -267,7 +267,7 @@ RCH Steamer HMI installer
   OS ................ ${PRETTY_NAME:-unknown}
   HMI runs as ....... $RUN_USER
   Pi fixed IP ....... $( [ "$KEEP_NETWORK" = yes ] && echo "(unchanged)" || echo "$PI_IP/$PI_PREFIX${PI_GATEWAY:+ via $PI_GATEWAY}")
-  PLC ............... $RCH_PLC_IP  (AMS Net ID $RCH_PLC_AMS_NETID)
+  PLC ............... $RCH_PLC_IP  (AMS Net ID ${RCH_PLC_AMS_NETID:-found automatically})
   Display ........... $DISPLAY_MODE, rotated $SCREEN_ROTATE° clockwise
   Touch ............. $TOUCH, rotated ${TOUCH_ROTATE:-$SCREEN_ROTATE}° clockwise
   Max CPU ........... $( [ "$CPU_MHZ" = 0 ] && echo "Pi default" || echo "$CPU_MHZ MHz")
