@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
             # On the Pi these come from /etc/rch-steamer.conf; the values
             # after the comma are used when the setting isn't there.
             ams_net_id=os.environ.get("RCH_PLC_AMS_NETID", "5.177.96.78.1.1"),  # CX7000 AMS Net ID
-            ip_address=os.environ.get("RCH_PLC_IP", "192.168.137.6"),           # CX7000 IP address
+            ip_address=os.environ.get("RCH_PLC_IP", "192.168.1.10"),           # CX7000 IP address
             poll_ms=250,
         )
 
