@@ -414,11 +414,13 @@ echo "${new[*]}" > "$CMDLINE"
 
 # Touch rotation. Rotating the display doesn't turn touch, so give libinput
 # a calibration matrix for every touchscreen.
+# Checked on the Waveshare 5" HDMI + XPT2046 panel: with the screen at 90°
+# clockwise, "0 1 0 -1 0 1" lines taps up (the other 90° matrix was 180° off).
 TOUCH_RULE=/etc/udev/rules.d/99-rch-touch.rules
 case "${TOUCH_ROTATE:-$SCREEN_ROTATE}" in
-    90)  matrix="0 -1 1 1 0 0" ;;
+    90)  matrix="0 1 0 -1 0 1" ;;
     180) matrix="-1 0 1 0 -1 1" ;;
-    270) matrix="0 1 0 -1 0 1" ;;
+    270) matrix="0 -1 1 1 0 0" ;;
     *)   matrix="" ;;
 esac
 if [ -n "$matrix" ]; then
