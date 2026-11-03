@@ -6,13 +6,22 @@ import sys
 # the app works no matter where it's launched from (e.g. a boot service).
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication
 from ui.screen_setup import MainWindow
 
 # Set by deploy/kiosk-launch.sh on the Raspberry Pi. When it's not set
 # (e.g. running on your desktop), the app opens as a normal window.
 KIOSK = os.environ.get("RCH_KIOSK") == "1"
+SCREEN_W, SCREEN_H = 800, 480
+
+
+def check_fits_screen(window):
+    need = window.minimumSizeHint()
+    if need.width() > SCREEN_W or need.height() > SCREEN_H:
+        print(f"WARNING: the HMI needs at least {need.width()}x{need.height()} px "
+              f"but the screen is {SCREEN_W}x{SCREEN_H}; the edges will be cut off "
+              f"on the Pi. Reduce minimum sizes, margins or spacing.", file=sys.stderr)
 
 
 def main():
@@ -29,12 +38,19 @@ def main():
     # 2. Create the main window instance (which builds the tabs internally)
     window = MainWindow()
 
+
     # 3. Render the window. On the Pi: full screen, no mouse pointer.
     if KIOSK:
         app.setOverrideCursor(Qt.BlankCursor)
         window.showFullScreen()
     else:
         window.show()
+
+    # Every screen must fit the 800x480 display. If the layout's minimum size
+    # is bigger, Qt can grow the window past the screen edge (the bottom gets
+    # cut off). On a PC the window just grows, so warn where it's visible.
+    # Checked just after showing: style sheet sizes only apply once shown.
+    QTimer.singleShot(0, lambda: check_fits_screen(window))
 
     # 4. Start the clean event loop execution
     sys.exit(app.exec())
