@@ -36,8 +36,6 @@ TAG_MAP = {
     "PLC_bMaintSV2": ("GVL_HMI.stHmiCommand.aValveCmd[2]", pyads.PLCTYPE_BOOL),
     "PLC_bMaintSV3": ("GVL_HMI.stHmiCommand.aValveCmd[3]", pyads.PLCTYPE_BOOL),
     "PLC_bMaintSV4": ("GVL_HMI.stHmiCommand.aValveCmd[4]", pyads.PLCTYPE_BOOL),
-    "PLC_bMaintDrainMode": ("GVL_HMI.stHmiCommand.bDrainMode", pyads.PLCTYPE_BOOL),
-    #"PLC_bMaintLoopback": ("GVL_HMI.stHmiCommand.", pyads.PLCTYPE_BOOL),
     "PLC_bMaintInitPurge": ("GVL_HMI.stHmiSetpoints.bSetPurgeOnStartup", pyads.PLCTYPE_BOOL),
     "PLC_rPT1": ("GVL_HMI.stHmiStatus.stProcess.rPt1Upstream", pyads.PLCTYPE_REAL),
     "PLC_rPT2": ("GVL_HMI.stHmiStatus.stProcess.rPt2Downstream", pyads.PLCTYPE_REAL),

@@ -23,8 +23,6 @@ class MaintScreen(QWidget):
         "PLC_bMaintSV2":       ("PLC_bMaintSV2",              "SV-2 Main",      "Open",    "Closed"),
         "PLC_bMaintSV3":       ("PLC_bMaintSV3",              "SV-3 Steam out", "Open",    "Closed"),
         "PLC_bMaintSV4":       ("PLC_bMaintSV4",              "SV-4 Water in",  "Open",    "Closed"),
-        "PLC_bMaintDrainMode": ("PLC_bMaintDrainMode",        "Drain mode",     "Running", "N2 under 5 psig"),
-        #"PLC_bMaintLoopback":  ("PLC_bLoopbackOn",       "Loopback test",  "Active",  "DSUB15"),
         "PLC_bMaintInitPurge": ("PLC_bMaintInitPurge", "Init purge",     "On",      "Off"),
     }
 
@@ -105,13 +103,8 @@ class MaintScreen(QWidget):
         self._apply_lock(self._in_maint, state)
 
         # output feedback comes from the PLC, never from the button's own toggle
-        sv = {i: bool(values[f"PLC_bMaintSV{i}"]) for i in range(1, 5)}
         for name, (fb_key, label, on_text, off_text) in self.OUTPUTS.items():
-            if fb_key is None:
-                # drain mode = SV-1, SV-2, SV-4 open and SV-3 closed (same test as the legacy PLC)
-                on = sv[1] and sv[2] and not sv[3] and sv[4]
-            else:
-                on = bool(values[fb_key])
+            on = bool(values[fb_key])
             self._feedback[name] = on
             btn = self._buttons[name]
             btn.setChecked(on)
