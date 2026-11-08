@@ -67,6 +67,7 @@ Alternatives: **SSH** from a laptop on the machine network, if SSH was turned on
 | Restart the HMI | `sudo systemctl restart rch-kiosk` |
 | See the HMI's error messages | `journalctl -u rch-kiosk -n 50` |
 | Add the Pi's ADS route to a PLC | `rch-add-route` |
+| Set the PIN for changing the model (25/50 SLM) | `sudo rch-set-pin` (works while locked; `--default` resets, `--status` shows) |
 | Unlock the SD card (then reboot) | `sudo raspi-config nonint disable_overlayfs && sudo reboot` |
 | Lock the SD card (then reboot) | `sudo raspi-config nonint enable_overlayfs && sudo reboot` |
 | Go back to the previous version (unlock first) | `sudo rch-usb-update --rollback` |
@@ -93,5 +94,6 @@ Alternatives: **SSH** from a laptop on the machine network, if SSH was turned on
 | `kiosk-launch.sh` | Starts the HMI full screen (installed as `rch-kiosk-launch`) |
 | `usb-update.sh` | The USB updater (installed as `rch-usb-update`) |
 | `add-plc-route.sh` | Adds the Pi's ADS route to the PLC (installed as `rch-add-route`) |
+| `set-pin.sh`, `set_model_pin.py` | Sets the model-change PIN (installed as `rch-set-pin`); stored on the boot partition as `rch-model-pin` |
 | `rch-steamer.conf` | Default settings, copied to `/etc/rch-steamer.conf` |
 | `systemd/` | Boot services for the HMI and the updater |

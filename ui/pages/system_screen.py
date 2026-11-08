@@ -1,4 +1,3 @@
-import hashlib
 import ipaddress
 import time
 from datetime import datetime, timedelta
@@ -6,6 +5,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 from PySide6.QtCore import Signal, QFile, Slot
 from PySide6.QtUiTools import QUiLoader
 from ui.pages.touch_dialogs import TouchConfirm, TouchKeypad
+from ui import pin_store
 
 
 class SystemScreen(QWidget):
@@ -36,9 +36,8 @@ class SystemScreen(QWidget):
     # each size is a retained BOOL in the PLC; exactly one should be TRUE
     MODEL_TAGS = {25: "PLC_bSetSize25L", 50: "PLC_bSetSize50L"}
 
-    # SHA-256 of the model-change PIN (default 2550). To change it:
-    #   python -c "import hashlib; print(hashlib.sha256(b'NEWPIN').hexdigest())"
-    MODEL_PIN_SHA256 = "a025f0314b164d72f92e11bd860ebbc0558addbeb5cf3ae1f06c4eded1d63ddc"
+    # The model-change PIN is checked by ui/pin_store.py. Set it on the Pi with
+    # `sudo rch-set-pin` (maintenance stick login); see deploy/UPDATING.md.
 
     def __init__(self):
         super().__init__()
@@ -324,7 +323,7 @@ class SystemScreen(QWidget):
         pin = TouchKeypad.get_value(self, "Enter PIN to change model", "pin")
         if pin is None:
             return
-        if hashlib.sha256(pin.encode()).hexdigest() != self.MODEL_PIN_SHA256:
+        if not pin_store.check_pin(pin):
             self._set_status(self.ui.lbl_ModelStatus, "Wrong PIN.", False)
             return
         if not TouchConfirm.ask(self, "Change steamer model",

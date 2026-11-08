@@ -133,6 +133,7 @@ install_system_files() {
     install_file "$src/kiosk-launch.sh"  /usr/local/bin/rch-kiosk-launch 755
     install_file "$src/add-plc-route.sh" /usr/local/bin/rch-add-route    755
     install_file "$src/usb-update.sh"    /usr/local/bin/rch-usb-update  755
+    install_file "$src/set-pin.sh"       /usr/local/bin/rch-set-pin     755
 
     sed "s/@USER@/$user/" "$src/systemd/rch-kiosk.service" > /etc/systemd/system/rch-kiosk.service.tmp
     mv -f /etc/systemd/system/rch-kiosk.service.tmp /etc/systemd/system/rch-kiosk.service
