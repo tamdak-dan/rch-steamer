@@ -163,33 +163,20 @@
                  </property>
                 </spacer>
                </item>
-               <item>
-                <widget class="QLabel" name="lbl_RemoteBanner">
-                 <property name="visible">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>REMOTE CONTROL</string>
-                 </property>
-                 <property name="toolTip">
-                  <string>Switch to Local on the System page to use these controls.</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer_banner">
-                 <property name="orientation">
-                  <enum>Qt::Orientation::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
               </layout>
+             </item>
+             <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
+              <widget class="QLabel" name="lbl_RemoteBanner">
+               <property name="visible">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>REMOTE CONTROL</string>
+               </property>
+               <property name="toolTip">
+                <string>Switch to Local on the System page to use these controls.</string>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="verticalSpacer">
@@ -205,6 +192,76 @@
               </spacer>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QFrame" name="frm_InitChecklist">
+             <property name="visible">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>InitMain moves to SteamFlowing once all three are checked.</string>
+             </property>
+             <layout class="QVBoxLayout" name="InitChecklist_V">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="leftMargin">
+               <number>10</number>
+              </property>
+              <property name="topMargin">
+               <number>8</number>
+              </property>
+              <property name="rightMargin">
+               <number>10</number>
+              </property>
+              <property name="bottomMargin">
+               <number>10</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lbl_InitChecklistTitle">
+                <property name="text">
+                 <string>Startup checks</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chk_InitSpaFlush">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::NoFocus</enum>
+                </property>
+                <property name="text">
+                 <string>SPA Flush</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chk_InitSpaTemp">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::NoFocus</enum>
+                </property>
+                <property name="text">
+                 <string>SPA Temp</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="chk_InitFlow">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::NoFocus</enum>
+                </property>
+                <property name="text">
+                 <string>Flow</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="PLC_bCmdDelivery">

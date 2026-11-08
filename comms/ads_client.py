@@ -75,6 +75,17 @@ TAG_MAP = {
     #"alarm_active":("MAIN.AlarmActive", pyads.PLCTYPE_BOOL),
 }
 
+# Tags only some PLC programs have. A missing symbol would fail the whole
+# sum-read (and show "PLC Disconnected"), so these are checked one by one on
+# connect, and every OPTIONAL_RECHECK_S while missing. Missing ones read as None.
+OPTIONAL_TAG_MAP = {
+    # InitMain -> SteamFlowing conditions (run page "Startup checks")
+    "PLC_bInitSpaFlushed": ("MAIN.fbSpaFlush.bSpaFlushed", pyads.PLCTYPE_BOOL),
+    "PLC_bInitTempInBand": ("MAIN.fbStateMachine.bTempInBand", pyads.PLCTYPE_BOOL),
+    "PLC_bInitFlowInBand": ("MAIN.fbStateMachine.bFlowInBand", pyads.PLCTYPE_BOOL),
+}
+OPTIONAL_RECHECK_S = 30
+
 # add active alarm array to be displayed on alarm table
 for i in range(1, 6):
     TAG_MAP[f"PLC_sFault{i}"]     = (f"GVL_HMI.stHmiStatus.aActiveFaults[1,{i}]", pyads.PLCTYPE_STRING)
@@ -133,6 +144,8 @@ class AdsWorker(QObject):
         self._plc = None    # pyads.Connection, created by _connect()
         self._timer = None  # QTimer, created in start()
         self._next_discovery = 0.0   # time.monotonic() of the next Net ID query
+        self._optional_ok = {}       # OPTIONAL_TAG_MAP key -> True if the PLC has it
+        self._next_optional_check = 0.0
 
     # -----------------------------------------------------------------------
     # START  —  the first thing that runs ON the background thread
@@ -184,6 +197,8 @@ class AdsWorker(QObject):
         try:
             self._plc.open()
             self.connection_changed.emit(True)
+            self._optional_ok = {}            # re-check optional tags on every (re)connect
+            self._next_optional_check = 0.0
         except pyads.ADSError as e:
             self.connection_changed.emit(False)
             self.error_occurred.emit(f"ADS connect failed: {e}")
@@ -213,6 +228,24 @@ class AdsWorker(QObject):
     # POLL  —  fires every poll_ms, this is the heartbeat of the module
     # -----------------------------------------------------------------------
     @Slot()
+    def _check_optional_tags(self):
+        """Find out which OPTIONAL_TAG_MAP symbols the running PLC has."""
+        missing = [k for k in OPTIONAL_TAG_MAP if not self._optional_ok.get(k)]
+        if not missing or time.monotonic() < self._next_optional_check:
+            return
+        self._next_optional_check = time.monotonic() + OPTIONAL_RECHECK_S
+        for key in missing:
+            sym, plc_type = OPTIONAL_TAG_MAP[key]
+            try:
+                self._plc.read_by_name(sym, plc_type)
+                if key in self._optional_ok:          # was missing before: say it's back
+                    self.error_occurred.emit(f"PLC now has {sym}")
+                self._optional_ok[key] = True
+            except pyads.ADSError:
+                if key not in self._optional_ok:      # report once per connection
+                    self.error_occurred.emit(f"PLC has no {sym}; showing it as unknown")
+                self._optional_ok[key] = False
+
     def _poll(self):
         # Guard clause: if we're not connected, spend this tick trying to
         # reconnect instead of reading. This gives you automatic recovery
@@ -230,13 +263,17 @@ class AdsWorker(QObject):
             # At 6 tags and 250ms that's 24 round-trips/sec vs 4. On a
             # CX7000 (small ARM controller, modest ADS server) that
             # difference is the gap between "fine" and "sluggish".
-            symbol_names = [sym for sym, _ in TAG_MAP.values()]
+            self._check_optional_tags()
+            optional = {key: OPTIONAL_TAG_MAP[key] for key, ok in self._optional_ok.items() if ok}
+            symbol_names = [sym for sym, _ in TAG_MAP.values()] + [sym for sym, _ in optional.values()]
             raw = self._plc.read_list_by_name(symbol_names)
 
             # raw comes back keyed by PLC symbol name ("MAIN.PT1"). Flip it
             # to your friendly keys ("pt1") so nothing downstream of here
             # ever needs to know what the PLC calls things.
             values = {key: raw[sym] for key, (sym, _) in TAG_MAP.items()}
+            for key, (sym, _) in OPTIONAL_TAG_MAP.items():
+                values[key] = raw[sym] if key in optional else None
 
             # One signal carrying the whole snapshot, rather than one signal
             # per tag. This means the UI updates atomically — you never
