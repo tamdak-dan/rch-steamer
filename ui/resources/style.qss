@@ -171,6 +171,7 @@ QLabel#lbl_RemoteBanner {
     background-color: #ffb74d;
     border-radius: 9px;
     padding: 1px 12px;
+    margin-top: 6px;                     /* gap under the setpoint line */
 }
 
 /* Run page: InitMain startup checklist (shown only in InitMain) */
