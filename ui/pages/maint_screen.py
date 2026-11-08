@@ -103,6 +103,7 @@ class MaintScreen(QWidget):
 
         # start locked until the first poll says otherwise
         self._in_maint = False
+        self._drain_off_sent = False   # an automatic "drain off" is waiting for feedback
         self._feedback = {name: False for name in self.OUTPUTS}
         self._apply_lock(False, "")
 
@@ -111,6 +112,16 @@ class MaintScreen(QWidget):
         state = values["PLC_sMachineState"]
         self._in_maint = state == self.MAINT_STATE
         self._apply_lock(self._in_maint, state)
+
+        # Drain mode only belongs in maintenance. However maintenance ended
+        # (exit button, fault, SES off), switch it off once; wait for the
+        # PLC to show it off before trying again.
+        drain_on = bool(values[self.DRAIN_KEY])
+        if not drain_on:
+            self._drain_off_sent = False
+        elif not self._in_maint and not self._drain_off_sent:
+            self._drain_off_sent = True
+            self.output_requested.emit(self.DRAIN_KEY, False)
 
         # output feedback comes from the PLC, never from the button's own toggle
         for name, (fb_key, label, on_text, off_text) in self.OUTPUTS.items():
@@ -175,6 +186,8 @@ class MaintScreen(QWidget):
     def _on_maint_clicked(self):
         # ask the PLC; the button state follows sMachineState on the next poll
         self.ui.btn_MaintEnterExit.setChecked(self._in_maint)
+        if self._in_maint and self._feedback[self.DRAIN_KEY]:
+            self.output_requested.emit(self.DRAIN_KEY, False)   # leaving: stop drain mode first
         self.maint_toggled.emit(not self._in_maint)
 
     def _on_output_clicked(self, name: str):
