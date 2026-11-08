@@ -79,10 +79,12 @@ TAG_MAP = {
 # sum-read (and show "PLC Disconnected"), so these are checked one by one on
 # connect, and every OPTIONAL_RECHECK_S while missing. Missing ones read as None.
 OPTIONAL_TAG_MAP = {
-    # InitMain -> SteamFlowing conditions (run page "Startup checks")
-    "PLC_bInitSpaFlushed": ("MAIN.fbSpaFlush.bSpaFlushed", pyads.PLCTYPE_BOOL),
-    "PLC_bInitTempInBand": ("MAIN.fbStateMachine.bTempInBand", pyads.PLCTYPE_BOOL),
-    "PLC_bInitFlowInBand": ("MAIN.fbStateMachine.bFlowInBand", pyads.PLCTYPE_BOOL),
+    # InitMain -> SteamFlowing conditions (run page "Startup checks"). Published in
+    # ST_ProcessValues by FB_ProcessCalcs (TwinCAT 9234367); optional so a unit on
+    # an older PLC program still connects.
+    "PLC_bInitSpaFlushed": ("GVL_HMI.stHmiStatus.stProcess.bSpaFlushed", pyads.PLCTYPE_BOOL),
+    "PLC_bInitTempInBand": ("GVL_HMI.stHmiStatus.stProcess.bTempInBand", pyads.PLCTYPE_BOOL),
+    "PLC_bInitFlowInBand": ("GVL_HMI.stHmiStatus.stProcess.bFlowInBand", pyads.PLCTYPE_BOOL),
 }
 OPTIONAL_RECHECK_S = 30
 
