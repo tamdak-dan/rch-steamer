@@ -198,6 +198,7 @@ class RunScreen(QWidget):
         self.ui.PLC_bCmdReset.setEnabled(local)
         self.ui.lbl_RemoteBanner.setVisible(not local)
         self.ui.btn_SetFlow.setVisible(local)     # same spot as the banner: one or the other
+        self._match_set_flow_width()
 
         # buttons follow the PLC: a fault or reset turns them off on its own
         self._ses_on = state in self.SES_ON_STATES
@@ -223,6 +224,13 @@ class RunScreen(QWidget):
     @Slot(int)
     def _on_flow_slider_committed(self, value: int):
         self._send_setpoint(value / self.TICKS_PER_SLM)   # 0-100 ticks -> 0-25 SLM, 0-200 -> 0-50 SLM
+
+    def _match_set_flow_width(self):
+        """Make Set flow exactly as wide as the "Steam Flow (SLM)" title above it.
+        Measured at runtime, since fonts render a little differently on the Pi."""
+        width = self.ui.B1_MeasuredFlow.sizeHint().width()
+        if width > 0 and self.ui.btn_SetFlow.width() != width:
+            self.ui.btn_SetFlow.setFixedWidth(width)
 
     @Slot()
     def _on_set_flow_clicked(self):
