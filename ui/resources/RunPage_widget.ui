@@ -169,7 +169,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="text">
-                  <string>REMOTE CONTROL ACTIVE</string>
+                  <string>REMOTE CONTROL</string>
                  </property>
                  <property name="toolTip">
                   <string>Switch to Local on the System page to use these controls.</string>
@@ -216,7 +216,7 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>165</width>
+               <width>175</width>
                <height>150</height>
               </size>
              </property>
@@ -238,7 +238,7 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>165</width>
+               <width>175</width>
                <height>150</height>
               </size>
              </property>
