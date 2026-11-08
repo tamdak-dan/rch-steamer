@@ -40,6 +40,12 @@ TAG_MAP = {
     "PLC_bMaintSV3": ("GVL_HMI.stHmiCommand.aValveCmd[3]", pyads.PLCTYPE_BOOL),
     "PLC_bMaintSV4": ("GVL_HMI.stHmiCommand.aValveCmd[4]", pyads.PLCTYPE_BOOL),
     "PLC_bMaintDrainMode": ("GVL_HMI.stHmiCommand.bDrainMode", pyads.PLCTYPE_BOOL),
+    # actual valve outputs (after drain mode and interlocks), shown on the valve buttons.
+    # ST_HmiStatus.arValveState was meant for this but nothing fills it in yet.
+    "PLC_bValveSV1": ("GVL_IO.boSV1_DrainValve", pyads.PLCTYPE_BOOL),
+    "PLC_bValveSV2": ("GVL_IO.boSV2_SpaValve", pyads.PLCTYPE_BOOL),
+    "PLC_bValveSV3": ("GVL_IO.boSV3_DeliveryValve", pyads.PLCTYPE_BOOL),
+    "PLC_bValveSV4": ("GVL_IO.boSV4_WaterInletValve", pyads.PLCTYPE_BOOL),
     "PLC_bMaintInitPurge": ("GVL_HMI.stHmiSetpoints.bSetPurgeOnStartup", pyads.PLCTYPE_BOOL),
     "PLC_rPT1": ("GVL_HMI.stHmiStatus.stProcess.rPt1Upstream", pyads.PLCTYPE_REAL),
     "PLC_rPT2": ("GVL_HMI.stHmiStatus.stProcess.rPt2Downstream", pyads.PLCTYPE_REAL),
