@@ -75,6 +75,7 @@ class RunScreen(QWidget):
     ses_toggled = Signal(bool)   # True = SES On requested, False = SES Off requested
     delivery_toggled = Signal(bool)   # True = Delivery On requested, False = Delivery Off requested
     reset_clicked = Signal()   # emitted when the reset button is clicked
+    TICKS_PER_SLM = 4   # slider steps per SLM: 0.25 SLM resolution
     DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the Delivery button can be used
     SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
                            "SetDiffPressure", "InitMain"}   # states where the SES button can be used
@@ -106,8 +107,12 @@ class RunScreen(QWidget):
         # capture value after release of slider
         self.ui.horizontalSlider.setTracking(False)
         self.ui.horizontalSlider.sliderMoved.connect(
-            lambda v: self.ui.PLC_nSteamFlowStpt.setText(f"{v / 4:.2f}"))
+            lambda v: self.ui.PLC_nSteamFlowStpt.setText(f"{v / self.TICKS_PER_SLM:.2f}"))
         self.ui.horizontalSlider.valueChanged.connect(self._on_flow_slider_committed)
+
+        # slider spans the model's rated flow: 0-25 SLM (102B-25) or 0-50 SLM (102B-50)
+        self._model_slm = None
+        self._set_flow_range(25)
 
         # setup fault table
         ROW_H = 30
@@ -159,6 +164,11 @@ class RunScreen(QWidget):
                 time_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)   # right justify
                 t.setItem(row, 1, time_item)
 
+        # -50 only when its size bit alone is set; otherwise (incl. "Model not
+        # set") use the -25 range, the safer of the two.
+        is_50 = values.get("PLC_bSetSize50L") and not values.get("PLC_bSetSize25L")
+        self._set_flow_range(50 if is_50 else 25)
+
         state = values["PLC_sMachineState"]
         # Remote (set on the System page): the EtherNet/IP tool owns these, so lock them here.
         # A missing tag reads as Local so the page still works before the PLC has the variable.
@@ -178,9 +188,21 @@ class RunScreen(QWidget):
         self._show_toggle(self.ui.PLC_bCmdDelivery, self._delivery_on, "Delivery Enabled", "Delivery Disabled")
 
 
+    def _set_flow_range(self, slm: int):
+        if slm == self._model_slm:
+            return
+        self._model_slm = slm
+        slider = self.ui.horizontalSlider
+        # Changing the range must not send a setpoint by itself (switching
+        # 50 -> 25 clamps the handle), so keep valueChanged quiet here.
+        slider.blockSignals(True)
+        slider.setMaximum(slm * self.TICKS_PER_SLM)
+        slider.blockSignals(False)
+        self.ui.PLC_nSteamFlowStpt.setText(f"{slider.value() / self.TICKS_PER_SLM:.2f}")
+
     @Slot(int)
     def _on_flow_slider_committed(self, value: int):
-        sp = value / 4.0                      # 0–100 ticks -> 0–25 SLM
+        sp = value / self.TICKS_PER_SLM       # 0-100 ticks -> 0-25 SLM, 0-200 -> 0-50 SLM
         self.flow_setpoint_changed.emit(sp)
 
     def _on_ses_clicked(self):
