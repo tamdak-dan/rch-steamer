@@ -118,8 +118,9 @@ QPushButton#PLC_bCmdSes {
 
 /* Unlocked, on */
 QPushButton#PLC_bCmdSes:checked {
-    background-color: #00ca3d;
-    border: __button_border_checked__;
+    background-color: #ffffff;           /* on: white with black text, like the selected nav button */
+    color: #000000;
+    border: 2px solid #ffffff;
 }
 
 /* Locked, off */
@@ -145,8 +146,9 @@ QPushButton#PLC_bCmdDelivery {
 
 /* Unlocked, on */
 QPushButton#PLC_bCmdDelivery:checked {
-    background-color: #00ca3d;
-    border: __button_border_checked__;
+    background-color: #ffffff;           /* on: white with black text, like the selected nav button */
+    color: #000000;
+    border: 2px solid #ffffff;
 }
 
 /* Locked, off */
@@ -265,8 +267,9 @@ QPushButton[maint="true"] {
 
 /* Unlocked, on */
 QPushButton[maint="true"]:checked {
-    background-color: #00ca3d;
-    border: __button_border_checked__;
+    background-color: #ffffff;           /* on: white with black text, like the selected nav button */
+    color: #000000;
+    border: 2px solid #ffffff;
 }
 
 /* Locked, off */
@@ -342,8 +345,9 @@ QPushButton[sys="true"] {
     border: __button_border__;
 }
 QPushButton[sys="true"]:checked {
-    background-color: #00ca3d;
-    border: __button_border_checked__;
+    background-color: #ffffff;           /* on: white with black text, like the selected nav button */
+    color: #000000;
+    border: 2px solid #ffffff;
 }
 QPushButton[sys="true"]:disabled {
     background-color: #2a2a2a;
