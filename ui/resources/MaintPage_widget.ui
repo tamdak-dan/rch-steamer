@@ -239,7 +239,7 @@ Closed</string>
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="MaintPage_Modes" stretch="0,1,2">
+      <layout class="QVBoxLayout" name="MaintPage_Modes" stretch="0,1,1,1">
        <property name="spacing">
         <number>8</number>
        </property>
@@ -247,6 +247,32 @@ Closed</string>
         <widget class="QLabel" name="H3_Modes">
          <property name="text">
           <string>Modes</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="PLC_bMaintDrainMode">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>56</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Drain mode
+N2 under 5 psig</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="maint" stdset="0">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
