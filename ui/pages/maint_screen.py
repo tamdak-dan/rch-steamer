@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTableWidgetItem, 
 from PySide6.QtCore import Signal, QFile, Slot, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtUiTools import QUiLoader
+from ui.pages.touch_dialogs import TouchConfirm
 
 
 class MaintScreen(QWidget):
@@ -23,8 +24,17 @@ class MaintScreen(QWidget):
         "PLC_bMaintSV2":       ("PLC_bMaintSV2",              "SV-2 Main",      "Open",    "Closed"),
         "PLC_bMaintSV3":       ("PLC_bMaintSV3",              "SV-3 Steam out", "Open",    "Closed"),
         "PLC_bMaintSV4":       ("PLC_bMaintSV4",              "SV-4 Water in",  "Open",    "Closed"),
+        "PLC_bMaintDrainMode": ("PLC_bMaintDrainMode", "Drain mode",     "Running", "Air < 5 psi"),
         "PLC_bMaintInitPurge": ("PLC_bMaintInitPurge", "Init purge",     "On",      "Off"),
     }
+
+    # Drain mode blows the vessel out with air fed into the DI water line.
+    # Only start it once the operator confirms the air supply is safe.
+    DRAIN_KEY = "PLC_bMaintDrainMode"
+    DRAIN_CONFIRM_TITLE = "Start drain mode"
+    DRAIN_CONFIRM_TEXT = ("Confirm that clean, dry air below 5 psi is connected to the DI water line.\n\n"
+                          "WARNING: Air above 5 psi can damage the SPA.")
+    DRAIN_CONFIRM_OK = "Air connected, start"
 
     # readings table rows: (label, value key)
     READINGS = (
@@ -171,4 +181,8 @@ class MaintScreen(QWidget):
         # put the button back to the PLC's state until feedback confirms the change
         requested = not self._feedback[name]
         self._buttons[name].setChecked(self._feedback[name])
+        # starting drain mode needs the operator to confirm the air supply; stopping doesn't
+        if name == self.DRAIN_KEY and requested and not TouchConfirm.ask(
+                self, self.DRAIN_CONFIRM_TITLE, self.DRAIN_CONFIRM_TEXT, self.DRAIN_CONFIRM_OK):
+            return
         self.output_requested.emit(name, requested)
