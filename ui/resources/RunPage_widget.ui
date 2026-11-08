@@ -169,8 +169,8 @@
               <widget class="QPushButton" name="btn_SetFlow">
                <property name="minimumSize">
                 <size>
-                 <width>130</width>
-                 <height>36</height>
+                 <width>170</width>
+                 <height>44</height>
                 </size>
                </property>
                <property name="focusPolicy">
