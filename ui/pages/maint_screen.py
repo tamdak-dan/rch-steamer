@@ -20,10 +20,11 @@ class MaintScreen(QWidget):
     # button object name: (feedback key, label, on text, off text)
     # The button object name doubles as the command key in TAG_MAP, same as the run screen.
     OUTPUTS = {
-        "PLC_bMaintSV1":       ("PLC_bMaintSV1",              "SV-1 Drain",     "Open",    "Closed"),
-        "PLC_bMaintSV2":       ("PLC_bMaintSV2",              "SV-2 Main",      "Open",    "Closed"),
-        "PLC_bMaintSV3":       ("PLC_bMaintSV3",              "SV-3 Steam out", "Open",    "Closed"),
-        "PLC_bMaintSV4":       ("PLC_bMaintSV4",              "SV-4 Water in",  "Open",    "Closed"),
+        # valves show the PLC's actual outputs, so drain mode's valves appear too
+        "PLC_bMaintSV1":       ("PLC_bValveSV1",              "SV-1 Drain",     "Open",    "Closed"),
+        "PLC_bMaintSV2":       ("PLC_bValveSV2",              "SV-2 Main",      "Open",    "Closed"),
+        "PLC_bMaintSV3":       ("PLC_bValveSV3",              "SV-3 Steam out", "Open",    "Closed"),
+        "PLC_bMaintSV4":       ("PLC_bValveSV4",              "SV-4 Water in",  "Open",    "Closed"),
         "PLC_bMaintDrainMode": ("PLC_bMaintDrainMode", "Drain mode",     "Running", "Air < 5 psi"),
         "PLC_bMaintInitPurge": ("PLC_bMaintInitPurge", "Init purge",     "On",      "Off"),
     }
@@ -31,6 +32,8 @@ class MaintScreen(QWidget):
     # Drain mode blows the vessel out with air fed into the DI water line.
     # Only start it once the operator confirms the air supply is safe.
     DRAIN_KEY = "PLC_bMaintDrainMode"
+    VALVE_KEYS = ("PLC_bMaintSV1", "PLC_bMaintSV2", "PLC_bMaintSV3", "PLC_bMaintSV4")
+    DRAIN_VALVE_NOTE = "Drain mode is controlling the valves. Stop drain mode to use them."
     DRAIN_CONFIRM_TITLE = "Start drain mode"
     DRAIN_CONFIRM_TEXT = ("Confirm that clean, dry air below 5 psi is connected to the DI water line.\n\n"
                           "WARNING: Air above 5 psi can damage the SPA.")
@@ -104,6 +107,7 @@ class MaintScreen(QWidget):
         # start locked until the first poll says otherwise
         self._in_maint = False
         self._drain_off_sent = False   # an automatic "drain off" is waiting for feedback
+        self._valve_note = self.ui.lbl_ValveNote.text()   # restored when drain mode stops
         self._feedback = {name: False for name in self.OUTPUTS}
         self._apply_lock(False, "")
 
@@ -117,6 +121,11 @@ class MaintScreen(QWidget):
         # (exit button, fault, SES off), switch it off once; wait for the
         # PLC to show it off before trying again.
         drain_on = bool(values[self.DRAIN_KEY])
+        # drain mode owns SV-1..4 in the PLC, so manual valve taps would do nothing
+        drain_owns_valves = self._in_maint and drain_on
+        for key in self.VALVE_KEYS:
+            self._buttons[key].setEnabled(self._in_maint and not drain_on)
+        self.ui.lbl_ValveNote.setText(self.DRAIN_VALVE_NOTE if drain_owns_valves else self._valve_note)
         if not drain_on:
             self._drain_off_sent = False
         elif not self._in_maint and not self._drain_off_sent:
