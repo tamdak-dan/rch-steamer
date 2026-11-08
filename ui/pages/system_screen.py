@@ -15,7 +15,7 @@ class SystemScreen(QWidget):
     eip_apply_requested = Signal(object, object, object)   # (ip, subnet mask, gateway)
     time_set_requested = Signal(object)               # new PLC clock as a DT value (seconds since 1970-01-01, local time)
     model_change_requested = Signal(int)              # selected size: 25 or 50 (screen_setup writes bSetSize25L/50L)
-    control_mode_requested = Signal(bool)             # True = Remote (EtherNet/IP has the Run page controls), False = Local
+    control_mode_requested = Signal(int)              # 0 Local, 1 EtherNet/IP, 2 DB15 (MODE_* below)
 
     # Match these to GVL_HMI.stHmiStatus.sStateName
     MODEL_CHANGE_STATES = {"SesOff"}       # the size can only change while the steamer is off
@@ -31,6 +31,14 @@ class SystemScreen(QWidget):
     TIME_CONFIRM_TIMEOUT_S = 10            # give up waiting after this and say so
 
     DT_EPOCH = datetime(1970, 1, 1)        # TwinCAT DT = seconds since this, in the PLC's local time
+
+    # GVL_HMI.stHmiSetpoints.bSetRemoteMode (BYTE): who has the Run page controls
+    MODE_LOCAL, MODE_EIP, MODE_DB15 = 0, 1, 2
+    MODE_NAMES = {MODE_LOCAL: "Local", MODE_EIP: "EIP", MODE_DB15: "DB15"}
+    MODE_CONFIRM = {
+        MODE_EIP: "The EtherNet/IP tool takes over System, Delivery, setpoint and Reset.",
+        MODE_DB15: "The DB15 remote connector takes over System, Delivery, setpoint and Reset.",
+    }
 
     MODELS = (25, 50)
     # each size is a retained BOOL in the PLC; exactly one should be TRUE
@@ -76,12 +84,14 @@ class SystemScreen(QWidget):
             btn.clicked.connect(lambda _checked, s=slm: self._on_model_clicked(s))
 
         # control mode: same pattern, the checked button always shows what the PLC reports
-        self._control_buttons = {False: self.ui.btn_ControlLocal, True: self.ui.btn_ControlRemote}
-        for remote, btn in self._control_buttons.items():
-            btn.clicked.connect(lambda _checked, r=remote: self._on_control_clicked(r))
+        self._control_buttons = {self.MODE_LOCAL: self.ui.btn_ControlLocal,
+                                 self.MODE_DB15: self.ui.btn_ControlDb15,
+                                 self.MODE_EIP: self.ui.btn_ControlEip}
+        for mode, btn in self._control_buttons.items():
+            btn.clicked.connect(lambda _checked, m=mode: self._on_control_clicked(m))
 
         self._state = ""
-        self._remote = None            # True/False from GVL_HMI.stHmiSetpoints.bSetRemoteMode; None = not reported
+        self._mode = None              # 0/1/2 from GVL_HMI.stHmiSetpoints.bSetRemoteMode; None = not reported
         self._connected = False
         self._size = None              # 25 or 50 from the PLC; None = not reported or not exactly one bit set
         self._size_bits = None         # (b25, b50) as read, for the status message
@@ -109,10 +119,10 @@ class SystemScreen(QWidget):
         for slm, btn in self._model_buttons.items():
             btn.setChecked(self._size == slm)
 
-        remote = values.get("PLC_bRemoteMode")
-        self._remote = None if remote is None else bool(remote)
-        for r, btn in self._control_buttons.items():
-            btn.setChecked(self._remote is r)
+        mode = values.get("PLC_nControlMode")
+        self._mode = None if mode is None else int(mode)
+        for m, btn in self._control_buttons.items():
+            btn.setChecked(self._mode == m)
 
         # active EtherNet/IP settings (read by the PLC from CoE 0xF900)
         raw = (values.get("PLC_nEipIpActive"), values.get("PLC_nEipMaskActive"), values.get("PLC_nEipGwActive"))
@@ -177,17 +187,20 @@ class SystemScreen(QWidget):
             self._set_status(self.ui.lbl_ModelStatus, "Turn the system off (SES Off) to change the model.")
 
         # control mode can change in any state, so the operator can always take control back
-        control_ok = self._connected and self._remote is not None
+        control_ok = self._connected and self._mode is not None
         for btn in self._control_buttons.values():
             btn.setEnabled(control_ok)
+        # one short note beside the "Control mode" heading; blank in Local
         if not self._connected:
             self._set_status(self.ui.lbl_ControlStatus, "PLC disconnected.")
-        elif self._remote is None:
-            self._set_status(self.ui.lbl_ControlStatus, "PLC hasn't reported the control mode.", False)
-        elif self._remote:
-            self._set_status(self.ui.lbl_ControlStatus, "Remote: Run page controls are locked.", False)
+        elif self._mode is None:
+            self._set_status(self.ui.lbl_ControlStatus, "Mode not reported.", False)
+        elif self._mode == self.MODE_LOCAL:
+            self._set_status(self.ui.lbl_ControlStatus, "")
+        elif self._mode in self.MODE_NAMES:
+            self._set_status(self.ui.lbl_ControlStatus, "Run page controls are locked.", False)
         else:
-            self._set_status(self.ui.lbl_ControlStatus, "Local: Run page controls work here.")
+            self._set_status(self.ui.lbl_ControlStatus, f"Unknown mode {self._mode}. Select one.", False)
 
         # the settings go through the PLC, so it has to be connected; SES Off because the
         # terminal's EtherNet/IP link to the tool drops while it restarts with the new address
@@ -332,20 +345,19 @@ class SystemScreen(QWidget):
             return
         self.model_change_requested.emit(slm)
 
-    def _on_control_clicked(self, remote: bool):
+    def _on_control_clicked(self, mode: int):
         # put the buttons back to the PLC's value until feedback confirms a change
-        for r, btn in self._control_buttons.items():
-            btn.setChecked(self._remote is r)
-        if remote == self._remote:
+        for m, btn in self._control_buttons.items():
+            btn.setChecked(self._mode == m)
+        if mode == self._mode:
             return
         # handing control away gets a confirm; taking it back to Local is always one tap
-        if remote and not TouchConfirm.ask(
-                self, "Switch to remote control",
-                "The EtherNet/IP tool takes over System, Delivery, setpoint and Reset. "
-                "Those Run page controls lock until you switch back to Local here.",
-                "Go remote"):
+        if mode != self.MODE_LOCAL and not TouchConfirm.ask(
+                self, f"Switch to {self.MODE_NAMES[mode]} control",
+                self.MODE_CONFIRM[mode] + " Those Run page controls lock until you switch back to Local here.",
+                f"Go {self.MODE_NAMES[mode]}"):
             return
-        self.control_mode_requested.emit(remote)
+        self.control_mode_requested.emit(mode)
 
     # ---- helpers ------------------------------------------------------------
     def _prefill_time(self):

@@ -63,7 +63,7 @@ TAG_MAP = {
     "PLC_nSetTimeState": ("GVL_HMI.stHmiStatus.nSetTimeState", pyads.PLCTYPE_INT),   # 0 idle, 1 busy, 2 done, 3 error
     "PLC_bSetSize25L":   ("GVL_HMI.stHmiSetpoints.bSetSize25L", pyads.PLCTYPE_BOOL),
     "PLC_bSetSize50L":   ("GVL_HMI.stHmiSetpoints.bSetSize50L", pyads.PLCTYPE_BOOL),
-    "PLC_bRemoteMode":   ("GVL_HMI.stHmiSetpoints.bSetRemoteMode", pyads.PLCTYPE_BOOL),  # FALSE local, TRUE remote (EtherNet/IP)
+    "PLC_nControlMode":  ("GVL_HMI.stHmiSetpoints.bSetRemoteMode", pyads.PLCTYPE_BYTE),  # 0 Local, 1 EtherNet/IP, 2 DB15
     # system screen - EIP (Ethernet/IP) network settings
     "PLC_nEipIpSet":      ("GVL_HMI.stHmiSetpoints.nIp", pyads.PLCTYPE_UDINT),
     "PLC_nEipMaskSet":    ("GVL_HMI.stHmiSetpoints.nMask", pyads.PLCTYPE_UDINT),
