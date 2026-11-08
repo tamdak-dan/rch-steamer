@@ -28,6 +28,9 @@ TAG_MAP = {
     "PLC_bSesOff": ("GVL_HMI.stHmiCommand.bSesOff", pyads.PLCTYPE_BOOL),  # system off indicator
     "PLC_bDeliveryOn": ("GVL_HMI.stHmiCommand.bSteamDeliveryOn", pyads.PLCTYPE_BOOL),  # delivery ON command indicator
     "PLC_bDeliveryOff": ("GVL_HMI.stHmiCommand.bSteamDeliveryOff", pyads.PLCTYPE_BOOL),  # delivery OFF command indicator
+    # Delivery feedback: TRUE while delivery is permitted in SteamFlowing (SV-3 open).
+    # FB_Hmi publishes it for the EtherNet/IP side; ST_HmiStatus has no copy yet.
+    "PLC_bDeliveryActive": ("GVL_REMOTE.bDeliveryOn", pyads.PLCTYPE_BOOL),
 
     #maint screen
     "PLC_bEnterMaint": ("GVL_HMI.stHmiCommand.bEnterMaint", pyads.PLCTYPE_BOOL),

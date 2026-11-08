@@ -75,7 +75,7 @@ class RunScreen(QWidget):
     ses_toggled = Signal(bool)   # True = SES On requested, False = SES Off requested
     delivery_toggled = Signal(bool)   # True = Delivery On requested, False = Delivery Off requested
     reset_clicked = Signal()   # emitted when the reset button is clicked
-    DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the System button can be used
+    DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the Delivery button can be used
     SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
                            "SetDiffPressure", "InitMain"}   # states where the SES button can be used
     SES_ON_STATES = SES_UNLOCKED_STATES - {"SesOff"}   # same list minus SesOff: "is the system on?"
@@ -171,7 +171,9 @@ class RunScreen(QWidget):
 
         # buttons follow the PLC: a fault or reset turns them off on its own
         self._ses_on = state in self.SES_ON_STATES
-        self._delivery_on = state == "SteamFlowing"
+        # Delivery is its own request in the PLC (off each time steam starts
+        # flowing), so follow the PLC's delivery feedback, not the state.
+        self._delivery_on = bool(values["PLC_bDeliveryActive"])
         self._show_toggle(self.ui.PLC_bCmdSes, self._ses_on, "System Enabled", "System Disabled")
         self._show_toggle(self.ui.PLC_bCmdDelivery, self._delivery_on, "Delivery Enabled", "Delivery Disabled")
 
