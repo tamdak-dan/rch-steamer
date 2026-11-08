@@ -166,6 +166,25 @@
               </layout>
              </item>
              <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
+              <widget class="QPushButton" name="btn_SetFlow">
+               <property name="minimumSize">
+                <size>
+                 <width>170</width>
+                 <height>44</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::FocusPolicy::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Type a flow setpoint on a number pad</string>
+               </property>
+               <property name="text">
+                <string>Set flow</string>
+               </property>
+              </widget>
+             </item>
+             <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
               <widget class="QLabel" name="lbl_RemoteBanner">
                <property name="visible">
                 <bool>false</bool>
