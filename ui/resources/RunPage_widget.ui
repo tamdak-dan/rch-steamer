@@ -256,12 +256,12 @@
                </spacer>
               </item>
               <item>
-               <widget class="QCheckBox" name="chk_InitSpaFlush">
+               <widget class="QCheckBox" name="chk_InitSpaTemp">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::NoFocus</enum>
                 </property>
                 <property name="text">
-                 <string>SPA Flush</string>
+                 <string>Temp</string>
                 </property>
                </widget>
               </item>
@@ -279,12 +279,12 @@
                </spacer>
               </item>
               <item>
-               <widget class="QCheckBox" name="chk_InitSpaTemp">
+               <widget class="QCheckBox" name="chk_InitSpaFlush">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::NoFocus</enum>
                 </property>
                 <property name="text">
-                 <string>SPA Temp</string>
+                 <string>SPA Flush</string>
                 </property>
                </widget>
               </item>
