@@ -217,7 +217,8 @@ QFrame#frm_InitChecklist QCheckBox::indicator:indeterminate {
 }
 
 /* Locked (Remote control mode): same look as the other locked buttons */
-QPushButton#PLC_bCmdReset:disabled {
+QPushButton#PLC_bCmdReset:disabled,
+QPushButton#btn_SetFlow:disabled {
     background-color: #2a2a2a;
     color: #777777;
     border: 2px dashed #555555;
