@@ -174,6 +174,13 @@ QLabel#lbl_RemoteBanner {
     margin-top: 6px;                     /* gap under the setpoint line */
 }
 
+/* Run page: "Set flow" button under the setpoint (local mode only) */
+QPushButton#btn_SetFlow {
+    font-size: 16px;
+    margin-top: 6px;
+    padding: 4px 14px;
+}
+
 /* Run page: InitMain startup checklist (shown only in InitMain) */
 QFrame#frm_InitChecklist {
     background-color: #2a2a2a;

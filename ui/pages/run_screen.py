@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QAbstractItemView, QHBoxLayout, QHeaderView, QSizePolicy, QStyledItemDelegate, QTableWidgetItem, QVBoxLayout, QWidget, QAbstractScrollArea, QStyleOptionViewItem, QStyle
 from PySide6.QtCore import Qt, Signal, QFile, Slot
 from PySide6.QtUiTools import QUiLoader 
+from ui.pages.touch_dialogs import TouchKeypad
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtCore import QRectF, Qt
 from datetime import datetime
@@ -112,6 +113,7 @@ class RunScreen(QWidget):
         self.ui.horizontalSlider.sliderMoved.connect(
             lambda v: self.ui.PLC_nSteamFlowStpt.setText(f"{v / self.TICKS_PER_SLM:.2f}"))
         self.ui.horizontalSlider.valueChanged.connect(self._on_flow_slider_committed)
+        self.ui.btn_SetFlow.clicked.connect(self._on_set_flow_clicked)
 
         # slider spans the model's rated flow: 0-25 SLM (102B-25) or 0-50 SLM (102B-50)
         self._model_slm = None
@@ -195,6 +197,7 @@ class RunScreen(QWidget):
         self.ui.horizontalSlider.setEnabled(local)
         self.ui.PLC_bCmdReset.setEnabled(local)
         self.ui.lbl_RemoteBanner.setVisible(not local)
+        self.ui.btn_SetFlow.setVisible(local)     # same spot as the banner: one or the other
 
         # buttons follow the PLC: a fault or reset turns them off on its own
         self._ses_on = state in self.SES_ON_STATES
@@ -219,7 +222,27 @@ class RunScreen(QWidget):
 
     @Slot(int)
     def _on_flow_slider_committed(self, value: int):
-        sp = value / self.TICKS_PER_SLM       # 0-100 ticks -> 0-25 SLM, 0-200 -> 0-50 SLM
+        self._send_setpoint(value / self.TICKS_PER_SLM)   # 0-100 ticks -> 0-25 SLM, 0-200 -> 0-50 SLM
+
+    @Slot()
+    def _on_set_flow_clicked(self):
+        top = self._model_slm
+        typed = TouchKeypad.get_value(self, f"Flow setpoint (0 - {top} SLM)", "decimal",
+                                      self.ui.PLC_nSteamFlowStpt.text())
+        if typed is None:
+            return                            # cancelled
+        try:
+            sp = float(typed)
+        except ValueError:
+            return
+        sp = min(max(sp, 0.0), float(top))    # cap to the selected model: 25 or 50 SLM
+        slider = self.ui.horizontalSlider
+        slider.blockSignals(True)             # the handle follows; only one write goes out
+        slider.setValue(round(sp * self.TICKS_PER_SLM))
+        slider.blockSignals(False)
+        self._send_setpoint(sp)
+
+    def _send_setpoint(self, sp: float):
         self._pending_sp = sp
         self._pending_until = time.monotonic() + self.SETPOINT_SETTLE_S
         self.ui.PLC_nSteamFlowStpt.setText(f"{sp:.2f}")

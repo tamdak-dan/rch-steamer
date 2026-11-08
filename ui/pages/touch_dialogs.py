@@ -24,18 +24,21 @@ class TouchKeypad(QDialog):
     mode:
       "ip"       digits and '.', e.g. 192.168.137.10
       "pin"      digits only, shown as dots
+      "decimal"  a number with up to DEC_PLACES decimals, e.g. 12.5
       a template made of '#' plus separators, e.g. "####-##-##" or "##:##:##".
                  Digits fill the '#' slots in order; OK unlocks once every slot is filled.
     """
     PIN_MAX = 8
     IP_MAX = 15
+    DEC_MAX = 6          # characters, e.g. "123.45"
+    DEC_PLACES = 2
 
     def __init__(self, parent, title: str, mode: str = "ip", initial: str = ""):
         super().__init__(parent, Qt.Dialog | Qt.FramelessWindowHint)
         self.setObjectName("TouchDialog")
         self.setModal(True)
         self._mode = mode
-        self._is_template = mode not in ("ip", "pin")
+        self._is_template = mode not in ("ip", "pin", "decimal")
         self._text = "" if self._is_template or mode == "pin" else initial
         self._fresh = bool(self._text)          # first key replaces a pre-filled value
 
@@ -61,8 +64,8 @@ class TouchKeypad(QDialog):
             btn.setMinimumSize(80, 52)
             btn.setFocusPolicy(Qt.NoFocus)
             if key == ".":
-                btn.setVisible(mode == "ip")    # keeps its grid cell so the layout doesn't shift
-                btn.setEnabled(mode == "ip")
+                btn.setVisible(mode in ("ip", "decimal"))    # keeps its grid cell so the layout doesn't shift
+                btn.setEnabled(mode in ("ip", "decimal"))
             btn.clicked.connect(lambda _c=False, k=key: self._on_key(k))
             grid.addWidget(btn, i // 3, i % 3)
         layout.addLayout(grid)
@@ -104,6 +107,14 @@ class TouchKeypad(QDialog):
             elif self._mode == "pin":
                 if len(self._text) < self.PIN_MAX:
                     self._text += key
+            elif self._mode == "decimal":
+                whole, dot, frac = self._text.partition(".")
+                if key == ".":
+                    if not dot and len(self._text) < self.DEC_MAX:
+                        self._text = (self._text or "0") + "."
+                elif len(self._text) < self.DEC_MAX and len(frac) < self.DEC_PLACES:
+                    self._text = "" if self._text == "0" else self._text   # no leading zeros
+                    self._text += key
             else:                               # ip
                 if len(self._text) < self.IP_MAX:
                     self._text += key
@@ -117,6 +128,9 @@ class TouchKeypad(QDialog):
             digits = iter(self._text)
             shown = "".join(next(digits, "_") if c == "#" else c for c in self._mode)
             ok = len(self._text) == self._slots()
+        elif self._mode == "decimal":
+            shown = self._text
+            ok = any(c.isdigit() for c in self._text)
         else:
             shown = self._text
             ok = len(self._text) > 0
