@@ -169,7 +169,7 @@
               <widget class="QPushButton" name="btn_SetFlow">
                <property name="minimumSize">
                 <size>
-                 <width>170</width>
+                 <width>0</width>
                  <height>44</height>
                 </size>
                </property>
