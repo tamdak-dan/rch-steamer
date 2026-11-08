@@ -177,7 +177,7 @@ QLabel#lbl_RemoteBanner {
 /* Run page: "Set flow" button under the setpoint (local mode only) */
 QPushButton#btn_SetFlow {
     font-size: 18px;
-    margin-top: 4px;                     /* 54px widget, 50px button: as tall as Run/Maint/System */
+    margin-top: 4px;                     /* 44px widget, 40px button: bottom lines up with Delivery/System */
     padding: 4px 14px;
 }
 
