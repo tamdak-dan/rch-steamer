@@ -119,6 +119,16 @@ class RunScreen(QWidget):
         self._pending_sp = None        # setpoint just sent, not yet read back from the PLC
         self._pending_until = 0.0
 
+        # InitMain startup checklist: display only, the PLC decides
+        self._init_checks = (
+            (self.ui.chk_InitSpaFlush, "PLC_bInitSpaFlushed"),
+            (self.ui.chk_InitSpaTemp,  "PLC_bInitTempInBand"),
+            (self.ui.chk_InitFlow,     "PLC_bInitFlowInBand"),
+        )
+        for chk, _key in self._init_checks:
+            chk.setTristate(True)                                # "partly checked" = PLC doesn't publish it
+            chk.setAttribute(Qt.WA_TransparentForMouseEvents)    # taps go through; operators can't tick it
+
         # setup fault table
         ROW_H = 30
         t = self.ui.tableWidget
@@ -176,6 +186,7 @@ class RunScreen(QWidget):
         self._show_setpoint(values["PLC_nSteamFlowStpt"])
 
         state = values["PLC_sMachineState"]
+        self._show_init_checks(state, values)
         # Remote (set on the System page): the EtherNet/IP tool owns these, so lock them here.
         # A missing tag reads as Local so the page still works before the PLC has the variable.
         local = not values.get("PLC_bRemoteMode", False)
@@ -213,6 +224,24 @@ class RunScreen(QWidget):
         self._pending_until = time.monotonic() + self.SETPOINT_SETTLE_S
         self.ui.PLC_nSteamFlowStpt.setText(f"{sp:.2f}")
         self.flow_setpoint_changed.emit(sp)
+
+    INIT_CHECK_STATE = "InitMain"   # the box only shows in this state
+
+    def _show_init_checks(self, state: str, values: dict):
+        """SPA Flush / SPA Temp / Flow: the three conditions InitMain waits for
+        before it moves to SteamFlowing."""
+        show = state == self.INIT_CHECK_STATE
+        self.ui.frm_InitChecklist.setVisible(show)
+        if not show:
+            return
+        for chk, key in self._init_checks:
+            value = values.get(key)
+            if value is None:
+                chk.setCheckState(Qt.PartiallyChecked)
+                chk.setToolTip("The PLC program doesn't publish this yet.")
+            else:
+                chk.setCheckState(Qt.Checked if value else Qt.Unchecked)
+                chk.setToolTip("")
 
     def _show_setpoint(self, sp):
         """Show the PLC's flow setpoint (GVL_HMI.stHmiSetpoints.rSetFlow) on the
