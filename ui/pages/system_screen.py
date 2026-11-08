@@ -190,18 +190,17 @@ class SystemScreen(QWidget):
         control_ok = self._connected and self._mode is not None
         for btn in self._control_buttons.values():
             btn.setEnabled(control_ok)
+        # one short note beside the "Control mode" heading; blank in Local
         if not self._connected:
             self._set_status(self.ui.lbl_ControlStatus, "PLC disconnected.")
         elif self._mode is None:
-            self._set_status(self.ui.lbl_ControlStatus, "PLC hasn't reported the control mode.", False)
+            self._set_status(self.ui.lbl_ControlStatus, "Mode not reported.", False)
         elif self._mode == self.MODE_LOCAL:
-            self._set_status(self.ui.lbl_ControlStatus, "Local: Run page controls work here.")
+            self._set_status(self.ui.lbl_ControlStatus, "")
         elif self._mode in self.MODE_NAMES:
-            self._set_status(self.ui.lbl_ControlStatus,
-                             f"{self.MODE_NAMES[self._mode]}: Run page controls are locked.", False)
+            self._set_status(self.ui.lbl_ControlStatus, "Run page controls are locked.", False)
         else:
-            self._set_status(self.ui.lbl_ControlStatus,
-                             f"PLC reports unknown mode {self._mode}. Select one.", False)
+            self._set_status(self.ui.lbl_ControlStatus, f"Unknown mode {self._mode}. Select one.", False)
 
         # the settings go through the PLC, so it has to be connected; SES Off because the
         # terminal's EtherNet/IP link to the tool drops while it restarts with the new address

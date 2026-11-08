@@ -421,11 +421,31 @@
         <number>6</number>
        </property>
        <item>
+        <layout class="QHBoxLayout" name="SystemPage_ControlHead" stretch="0,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
         <widget class="QLabel" name="H2_Control">
          <property name="text">
           <string>Control mode</string>
          </property>
         </widget>
+       </item>
+         <item>
+          <widget class="QLabel" name="lbl_ControlStatus">
+           <property name="text">
+            <string></string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+           <property name="hint" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="Line" name="line_control">
@@ -511,19 +531,6 @@
          </item>
         </layout>
        </item>
-       <item>
-          <widget class="QLabel" name="lbl_ControlStatus">
-           <property name="text">
-            <string>EIP or DB15 locks the Run page controls.</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-           <property name="hint" stdset="0">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
       </layout>
      </item>
     </layout>
