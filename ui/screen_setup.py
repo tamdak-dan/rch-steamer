@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
         self.system_screen.time_set_requested.connect(self._write_plc_time)
         self.system_screen.model_change_requested.connect(self._write_size)
         self.system_screen.eip_apply_requested.connect(self._write_eip)
-        self.system_screen.control_mode_requested.connect(lambda remote: self.ads.write("PLC_bRemoteMode", remote))
+        self.system_screen.control_mode_requested.connect(lambda mode: self.ads.write("PLC_nControlMode", mode))
 
         self.ads.error_occurred.connect(lambda msg: print(msg))
         self.ads.start()

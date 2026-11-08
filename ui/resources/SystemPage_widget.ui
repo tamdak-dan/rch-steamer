@@ -435,7 +435,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="SystemPage_ControlRow" stretch="0,0,1">
+        <layout class="QHBoxLayout" name="SystemPage_ControlRow" stretch="0,0,0,1">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -459,7 +459,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_ControlRemote">
+            <widget class="QPushButton" name="btn_ControlDb15">
              <property name="minimumSize">
               <size>
                <width>100</width>
@@ -467,7 +467,26 @@
               </size>
              </property>
              <property name="text">
-              <string>Remote</string>
+              <string>DB15</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="sys" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_ControlEip">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>50</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>EIP</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -478,9 +497,24 @@
             </widget>
            </item>
          <item>
+          <spacer name="ControlRow_fill">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
           <widget class="QLabel" name="lbl_ControlStatus">
            <property name="text">
-            <string>Remote locks the Run page controls.</string>
+            <string>EIP or DB15 locks the Run page controls.</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
@@ -490,8 +524,6 @@
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
       </layout>
      </item>
     </layout>

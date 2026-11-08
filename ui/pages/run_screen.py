@@ -81,6 +81,10 @@ class RunScreen(QWidget):
     TICKS_PER_SLM = 4   # slider steps per SLM: 0.25 SLM resolution
     SETPOINT_SETTLE_S = 2.0   # after sending a setpoint, wait this long for the PLC to show it
     DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the Delivery button can be used
+    # GVL_HMI.stHmiSetpoints.bSetRemoteMode (BYTE): who has the Run page controls
+    MODE_LOCAL = 0
+    REMOTE_BANNER = {1: "REMOTE: EIP", 2: "REMOTE: DB15"}
+
     SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
                            "SetDiffPressure", "InitMain"}   # states where the SES button can be used
     SES_ON_STATES = SES_UNLOCKED_STATES - {"SesOff"}   # same list minus SesOff: "is the system on?"
@@ -189,15 +193,17 @@ class RunScreen(QWidget):
 
         state = values["PLC_sMachineState"]
         self._show_init_checks(state, values)
-        # Remote (set on the System page): the EtherNet/IP tool owns these, so lock them here.
+        # Remote (EtherNet/IP or DB15, set on the System page): the tool owns these, so lock them here.
         # A missing tag reads as Local so the page still works before the PLC has the variable.
-        local = not values.get("PLC_bRemoteMode", False)
+        mode = values.get("PLC_nControlMode", self.MODE_LOCAL)
+        local = mode == self.MODE_LOCAL
         self.ui.PLC_bCmdSes.setEnabled(local and state in self.SES_UNLOCKED_STATES)
         self.ui.PLC_bCmdDelivery.setEnabled(local and state in self.DELIVERY_UNLOCKED_STATES)
         self.ui.horizontalSlider.setEnabled(local)
         self.ui.PLC_bCmdReset.setEnabled(local)
         self.ui.btn_SetFlow.setEnabled(local)     # stays visible, locked like the others
         self.ui.lbl_RemoteBanner.setVisible(not local)
+        self.ui.lbl_RemoteBanner.setText(self.REMOTE_BANNER.get(mode, "REMOTE CONTROL"))
 
         # buttons follow the PLC: a fault or reset turns them off on its own
         self._ses_on = state in self.SES_ON_STATES
