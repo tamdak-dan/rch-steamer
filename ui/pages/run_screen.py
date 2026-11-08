@@ -132,12 +132,14 @@ class RunScreen(QWidget):
             chk.setAttribute(Qt.WA_TransparentForMouseEvents)    # taps go through; operators can't tick it
 
         # setup fault table
-        ROW_H = 30
+        ROW_H = 28   # 5 rows; was 30, trimmed to make room for a taller Set flow button
         t = self.ui.tableWidget
         t.setColumnCount(2)
         t.setRowCount(5)
         t.setFixedHeight(ROW_H * t.rowCount() + 2 * t.frameWidth())
         t.horizontalHeader().setVisible(False)
+        t.verticalHeader().setMinimumSectionSize(ROW_H)
+        t.verticalHeader().setDefaultSectionSize(ROW_H)   # rows must match the fixed height, or a scrollbar appears
         t.verticalHeader().setVisible(False)
         t.setShowGrid(False)
         t.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
