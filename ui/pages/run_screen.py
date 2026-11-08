@@ -4,6 +4,8 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtCore import QRectF, Qt
 from datetime import datetime
+import math
+import time
 
 # Function to format fault timestamps
 def format_fault_time(ts: str) -> str:
@@ -76,6 +78,7 @@ class RunScreen(QWidget):
     delivery_toggled = Signal(bool)   # True = Delivery On requested, False = Delivery Off requested
     reset_clicked = Signal()   # emitted when the reset button is clicked
     TICKS_PER_SLM = 4   # slider steps per SLM: 0.25 SLM resolution
+    SETPOINT_SETTLE_S = 2.0   # after sending a setpoint, wait this long for the PLC to show it
     DELIVERY_UNLOCKED_STATES = {"SteamFlowing"}   # states where the Delivery button can be used
     SES_UNLOCKED_STATES = {"SteamFlowing", "SesOff", "CheckIfHot", "FillWater", "PurgeVessel",
                            "SetDiffPressure", "InitMain"}   # states where the SES button can be used
@@ -113,6 +116,8 @@ class RunScreen(QWidget):
         # slider spans the model's rated flow: 0-25 SLM (102B-25) or 0-50 SLM (102B-50)
         self._model_slm = None
         self._set_flow_range(25)
+        self._pending_sp = None        # setpoint just sent, not yet read back from the PLC
+        self._pending_until = 0.0
 
         # setup fault table
         ROW_H = 30
@@ -168,6 +173,7 @@ class RunScreen(QWidget):
         # set") use the -25 range, the safer of the two.
         is_50 = values.get("PLC_bSetSize50L") and not values.get("PLC_bSetSize25L")
         self._set_flow_range(50 if is_50 else 25)
+        self._show_setpoint(values["PLC_nSteamFlowStpt"])
 
         state = values["PLC_sMachineState"]
         # Remote (set on the System page): the EtherNet/IP tool owns these, so lock them here.
@@ -203,7 +209,29 @@ class RunScreen(QWidget):
     @Slot(int)
     def _on_flow_slider_committed(self, value: int):
         sp = value / self.TICKS_PER_SLM       # 0-100 ticks -> 0-25 SLM, 0-200 -> 0-50 SLM
+        self._pending_sp = sp
+        self._pending_until = time.monotonic() + self.SETPOINT_SETTLE_S
+        self.ui.PLC_nSteamFlowStpt.setText(f"{sp:.2f}")
         self.flow_setpoint_changed.emit(sp)
+
+    def _show_setpoint(self, sp):
+        """Show the PLC's flow setpoint (GVL_HMI.stHmiSetpoints.rSetFlow) on the
+        number and the slider, so a setpoint set elsewhere (EtherNet/IP, or
+        before a restart) appears here too."""
+        slider = self.ui.horizontalSlider
+        if sp is None or math.isnan(sp) or slider.isSliderDown():
+            return                            # operator is dragging: don't fight them
+        if self._pending_sp is not None:
+            if abs(sp - self._pending_sp) < 0.01 or time.monotonic() > self._pending_until:
+                self._pending_sp = None       # PLC has it (or gave up waiting): follow the PLC again
+            else:
+                return                        # write still on its way: keep showing what was sent
+        ticks = round(sp * self.TICKS_PER_SLM)
+        if slider.value() != ticks:
+            slider.blockSignals(True)         # moving the handle here must not send a setpoint
+            slider.setValue(ticks)            # clamps to the model's range if needed
+            slider.blockSignals(False)
+        self.ui.PLC_nSteamFlowStpt.setText(f"{sp:.2f}")   # the number always shows the PLC's value
 
     def _on_ses_clicked(self):
         self.ui.PLC_bCmdSes.setChecked(self._ses_on)        # undo the tap's own flip; PLC decides
