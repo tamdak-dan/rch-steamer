@@ -164,7 +164,11 @@ class RunScreen(QWidget):
         # Two decimals, like the setpoint. The PLC sends a 32-bit REAL, so str()
         # would show e.g. 0.1 as "0.10000000149011612" and widen the whole
         # window past the 800px screen.
-        self.ui.PLC_nSteamFlowMeasured.setText(f"{values['PLC_nSteamFlowMeasured']:.2f}")
+        # filtered flow (rFlowFiltered); raw rFlowActual on a PLC program without it
+        flow = values.get("PLC_rFlowFiltered")
+        if flow is None:
+            flow = values["PLC_nSteamFlowMeasured"]
+        self.ui.PLC_nSteamFlowMeasured.setText(f"{flow:.2f}")
 
         faults = tuple((values[f"PLC_sFault{i}"], values[f"PLC_sFaultTime{i}"]) for i in range(1, 6))
         if faults != self._last_faults:          # only redraw when the list actually changes
