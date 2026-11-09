@@ -135,6 +135,8 @@ class RunScreen(QWidget):
             chk.setTristate(True)                                # "partly checked" = PLC doesn't publish it
             chk.setAttribute(Qt.WA_TransparentForMouseEvents)    # taps go through; operators can't tick it
 
+        self._flush_width_fixed = False
+
         # setup fault table
         ROW_H = 30
         t = self.ui.tableWidget
@@ -259,6 +261,7 @@ class RunScreen(QWidget):
         self.flow_setpoint_changed.emit(sp)
 
     INIT_CHECK_STATE = "InitMain"   # the box only shows in this state
+    SPA_FLUSH_CYCLES = 20           # FB_SpaFlush.nFlushCycles: crossings needed to finish the flush
 
     def _show_init_checks(self, state: str, values: dict):
         """SPA Flush / SPA Temp / Flow: the three conditions InitMain waits for
@@ -275,6 +278,17 @@ class RunScreen(QWidget):
             else:
                 chk.setCheckState(Qt.Checked if value else Qt.Unchecked)
                 chk.setToolTip("")
+
+        # flush progress, e.g. "Flush 7/20" (just "Flush" if the PLC doesn't publish the count)
+        chk = self.ui.chk_InitSpaFlush
+        if not self._flush_width_fixed:       # room for the widest text, so the box doesn't resize as it counts
+            chk.setText(f"Flush {self.SPA_FLUSH_CYCLES}/{self.SPA_FLUSH_CYCLES}")
+            chk.ensurePolished()
+            chk.setMinimumWidth(chk.sizeHint().width())
+            self._flush_width_fixed = True
+        count = values.get("PLC_nSpaCrossings")
+        chk.setText(
+            "Flush" if count is None else f"Flush {min(count, self.SPA_FLUSH_CYCLES)}/{self.SPA_FLUSH_CYCLES}")
 
     def _show_setpoint(self, sp):
         """Show the PLC's flow setpoint (GVL_HMI.stHmiSetpoints.rSetFlow) on the
