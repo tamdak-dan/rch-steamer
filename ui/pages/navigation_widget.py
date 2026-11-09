@@ -64,7 +64,10 @@ class NavigationWidget(QWidget):
 
         self._show_model(values)
 
-        cat = self.STATE_CAT.get(state, "idle")
+        self._set_pill_cat(self.STATE_CAT.get(state, "idle"))
+
+    def _set_pill_cat(self, cat: str):
+        """Colour the state pill: run (green), startup (amber), fault (red), idle."""
         lbl = self.ui.PLC_sMachineState
         if lbl.property("cat") != cat:
             lbl.setProperty("cat", cat)
@@ -96,6 +99,7 @@ class NavigationWidget(QWidget):
     def set_connected(self, connected: bool):
         if not connected:
             self.ui.PLC_sMachineState.setText("PLC Disconnected")
+            self._set_pill_cat("fault")                   # red, not the last state's colour
             self._set_model_tag("--", False)             # don't show a size we can no longer confirm
 
     @Slot(int)
