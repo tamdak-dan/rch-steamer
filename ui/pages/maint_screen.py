@@ -52,6 +52,14 @@ class MaintScreen(QWidget):
         ("TC-4 process out", "PLC_rTC4"),
     )
 
+    # Level switch wiring. Normally open (NO): input TRUE = water at the sensor.
+    # Normally closed (NC): input TRUE = dry. Both are NC for now; set back to
+    # False when NO switches are fitted again.
+    LEVEL_SENSOR_NC = {
+        "PLC_bLS1": True,    # LS-1 process level
+        "PLC_bLS3": True,    # LS-3 low level
+    }
+
     COLOR_OK = QColor("#1e8e3e")            # same green as the run state pill
     COLOR_WARN = QColor("#c77c00")          # same amber as the startup state pill
 
@@ -188,8 +196,9 @@ class MaintScreen(QWidget):
             elif key.startswith("PLC_rTC"):
                 tc = values[key]
                 item.setText("No TC" if tc >= self.TC_OPEN_C else f"{tc:.0f} °C")
-            else:                                      # level sensors: True = water at the sensor
-                item.setText("Water" if values[key] else "Dry")
+            else:                                      # level sensors (see LEVEL_SENSOR_NC)
+                water = bool(values[key]) != self.LEVEL_SENSOR_NC.get(key, False)
+                item.setText("Water" if water else "Dry")
 
     @Slot()
     def _on_maint_clicked(self):
