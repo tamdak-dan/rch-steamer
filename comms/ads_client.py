@@ -93,6 +93,8 @@ OPTIONAL_TAG_MAP = {
     "PLC_bInitFlowInBand": ("GVL_HMI.stHmiStatus.stProcess.bFlowInBand", pyads.PLCTYPE_BOOL),
     # PT1-filtered steam flow (FB_ProcessCalcs, TwinCAT a33a7b8), shown on the run page
     "PLC_rFlowFiltered": ("GVL_HMI.stHmiStatus.stProcess.rFlowFiltered", pyads.PLCTYPE_REAL),
+    # SPA flush progress: pressure crossings so far (FB_SpaFlush.nCrossings, TwinCAT 06ff602)
+    "PLC_nSpaCrossings": ("GVL_HMI.stHmiStatus.stProcess.nSpaCorssings", pyads.PLCTYPE_UINT),
 }
 OPTIONAL_RECHECK_S = 30
 

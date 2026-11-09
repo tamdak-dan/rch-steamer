@@ -297,7 +297,7 @@
                  <enum>Qt::FocusPolicy::NoFocus</enum>
                 </property>
                 <property name="text">
-                 <string>SPA Flush</string>
+                 <string>Flush</string>
                 </property>
                </widget>
               </item>
